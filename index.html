@@ -36,24 +36,26 @@
             align-items: center;
             z-index: 9999;
             padding: 20px;
+            overflow-y: auto;
         }
 
         .login-card {
             background: #ffffff;
             width: 100%;
-            max-width: 420px;
-            padding: 30px 24px;
-            border-radius: 28px;
+            max-width: 400px;
+            padding: 24px;
+            border-radius: 24px;
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
             text-align: center;
+            margin: auto;
         }
 
         .logo-area {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .logo-area h1 {
-            font-size: 30px;
+            font-size: 26px;
             color: #1a73e8;
             font-weight: 800;
         }
@@ -67,9 +69,9 @@
         .main-tabs {
             display: flex;
             background: #f1f3f4;
-            border-radius: 16px;
+            border-radius: 14px;
             padding: 4px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .main-tab-btn {
@@ -80,7 +82,7 @@
             font-size: 14px;
             font-weight: 700;
             color: #5f6368;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
         }
 
@@ -91,7 +93,7 @@
         }
 
         .input-group {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             text-align: right;
         }
 
@@ -106,20 +108,11 @@
 
         .input-group input {
             width: 100%;
-            padding: 13px 16px;
+            padding: 12px 14px;
             border: 1px solid #dadce0;
-            border-radius: 14px;
+            border-radius: 12px;
             font-size: 15px;
             outline: none;
-        }
-
-        .otp-box {
-            background: #e8f0fe;
-            border: 1px dashed #1a73e8;
-            padding: 10px;
-            border-radius: 14px;
-            margin-bottom: 14px;
-            text-align: center;
         }
 
         .btn-submit {
@@ -128,7 +121,7 @@
             background: #1a73e8;
             color: #ffffff;
             border: none;
-            border-radius: 16px;
+            border-radius: 14px;
             font-size: 15px;
             font-weight: 700;
             cursor: pointer;
@@ -318,27 +311,38 @@
             </div>
 
             <div class="main-tabs">
-                <button type="button" class="main-tab-btn active" id="tabLogin" onclick="switchMainTab('login')">تسجيل الدخول</button>
-                <button type="button" class="main-tab-btn" id="tabRegister" onclick="switchMainTab('register')">إنشاء حساب جديد</button>
+                <button type="button" class="main-tab-btn active" id="tabLogin" onclick="switchAuthMode('login')">تسجيل الدخول</button>
+                <button type="button" class="main-tab-btn" id="tabRegister" onclick="switchAuthMode('register')">إنشاء حساب</button>
             </div>
 
-            <form id="authForm" onsubmit="handleAuthSubmit(event)">
+            <!-- نموذج تسجيل الدخول -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="input-group">
                     <label>رقم الهاتف</label>
-                    <input type="tel" id="phoneNumber" placeholder="07700000000" required>
+                    <input type="tel" id="loginPhone" placeholder="07700000000" required>
                 </div>
-
-                <div id="otpSection" class="hidden">
-                    <div class="otp-box">
-                        <p style="font-size: 12px; color: #1a73e8; font-weight: bold;">رمز التحقق التجريبي: 1234</p>
-                    </div>
-                    <div class="input-group">
-                        <label>أدخل رمز التحقق (OTP)</label>
-                        <input type="text" id="otpCode" placeholder="أدخل 1234" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold;">
-                    </div>
+                <div class="input-group">
+                    <label>كلمة المرور أو رمز التحقق</label>
+                    <input type="password" id="loginPass" placeholder="••••••••" required>
                 </div>
+                <button type="submit" class="btn-submit">تسجيل الدخول 🚀</button>
+            </form>
 
-                <button type="submit" class="btn-submit" id="btnSubmit">إرسال رمز التحقق 📩</button>
+            <!-- نموذج إنشاء حساب -->
+            <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <label>الاسم الكامل</label>
+                    <input type="text" id="regName" placeholder="أحمد ضياء" required>
+                </div>
+                <div class="input-group">
+                    <label>رقم الهاتف</label>
+                    <input type="tel" id="regPhone" placeholder="07700000000" required>
+                </div>
+                <div class="input-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="regPass" placeholder="8 أحرف على الأقل" minlength="8" required>
+                </div>
+                <button type="submit" class="btn-submit">إنشاء الحساب ودخول الخريطة ✨</button>
             </form>
         </div>
     </div>
@@ -348,7 +352,7 @@
         <div class="top-control-panel">
             <div class="google-search-bar">
                 <span style="font-size: 18px; color: #5f6368; cursor: pointer;" onclick="searchLocation()">🔍</span>
-                <input type="text" id="searchInput" placeholder="ابحث عن مكان (مثل: المنصور، الكرادة)..." onkeypress="handleSearch(event)">
+                <input type="text" id="searchInput" placeholder="ابحث عن مكان (مثل: المنصور، بغداد)..." onkeypress="handleSearch(event)">
                 <span style="font-size: 20px; cursor: pointer;" onclick="openProfile()">👤</span>
             </div>
 
@@ -382,10 +386,8 @@
     </div>
 
     <script>
-        let currentTab = 'login';
         let remainingTrips = 2;
         let isNewAccount = false;
-        let isOtpSent = false;
         let map = null;
         let userMarker = null;
         let destinationMarker = null;
@@ -396,50 +398,48 @@
 
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA'; 
 
-        function switchMainTab(tab) {
-            currentTab = tab;
-            isOtpSent = false;
-            document.getElementById('otpSection').classList.add('hidden');
-            document.getElementById('phoneNumber').disabled = false;
-            document.getElementById('btnSubmit').innerText = 'إرسال رمز التحقق 📩';
+        function switchAuthMode(mode) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabLogin = document.getElementById('tabLogin');
+            const tabRegister = document.getElementById('tabRegister');
+            const subTitle = document.getElementById('subTitle');
 
-            if (tab === 'login') {
-                document.getElementById('tabLogin').classList.add('active');
-                document.getElementById('tabRegister').classList.remove('active');
-                document.getElementById('subTitle').innerText = 'تسجيل الدخول إلى حسابك';
+            if (mode === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+                subTitle.innerText = 'تسجيل الدخول إلى حسابك';
             } else {
-                document.getElementById('tabRegister').classList.add('active');
-                document.getElementById('tabLogin').classList.remove('active');
-                document.getElementById('subTitle').innerText = 'أنشئ حسابك الجديد (متاح رحلتان فقط)';
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                tabRegister.classList.add('active');
+                tabLogin.classList.remove('active');
+                subTitle.innerText = 'أنشئ حسابك الجديد (رحلتان مجانيتان)';
             }
         }
 
-        function handleAuthSubmit(event) {
+        function handleLogin(event) {
             event.preventDefault();
-            const phone = document.getElementById('phoneNumber').value.trim();
+            const phone = document.getElementById('loginPhone').value.trim();
+            if (!phone) { alert('يرجى إدخال رقم الهاتف!'); return; }
             
-            if (!phone) { 
-                alert('يرجى إدخال رقم الهاتف أولاً!'); 
-                return; 
-            }
+            isNewAccount = false;
+            localStorage.setItem('xmaps_user', phone);
+            openMapScreen();
+        }
 
-            if (!isOtpSent) {
-                isOtpSent = true;
-                document.getElementById('otpSection').classList.remove('hidden');
-                document.getElementById('phoneNumber').disabled = true;
-                document.getElementById('btnSubmit').innerText = 'تأكيد الرمز والدخول 🚀';
-                alert('تم إرسال رمز التحقق (الرمز التجريبي: 1234)');
-            } else {
-                const otp = document.getElementById('otpCode').value.trim();
-                if (otp !== '1234') {
-                    alert('رمز التحقق غير صحيح! الرمز التجريبي هو 1234');
-                    return;
-                }
+        function handleRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            
+            if (!name || !phone) { alertيرجى ملء كافة الحقول المطلوبة!'); return; }
 
-                isNewAccount = (currentTab === 'register');
-                localStorage.setItem('xmaps_user', phone);
-                openMapScreen();
-            }
+            isNewAccount = true;
+            localStorage.setItem('xmaps_user', name + ' (' + phone + ')');
+            openMapScreen();
         }
 
         function openMapScreen() {
@@ -587,9 +587,4 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'ar-SA';
-                utterance.rate = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        let
+  
