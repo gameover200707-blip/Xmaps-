@@ -42,20 +42,20 @@
         .login-card {
             background: #ffffff;
             width: 100%;
-            max-width: 400px;
-            padding: 24px;
-            border-radius: 24px;
+            max-width: 420px;
+            padding: 28px 24px;
+            border-radius: 28px;
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
             text-align: center;
             margin: auto;
         }
 
         .logo-area {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .logo-area h1 {
-            font-size: 26px;
+            font-size: 28px;
             color: #1a73e8;
             font-weight: 800;
         }
@@ -69,9 +69,9 @@
         .main-tabs {
             display: flex;
             background: #f1f3f4;
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 4px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .main-tab-btn {
@@ -82,7 +82,7 @@
             font-size: 14px;
             font-weight: 700;
             color: #5f6368;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
         }
 
@@ -93,7 +93,7 @@
         }
 
         .input-group {
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             text-align: right;
         }
 
@@ -108,11 +108,20 @@
 
         .input-group input {
             width: 100%;
-            padding: 12px 14px;
+            padding: 13px 16px;
             border: 1px solid #dadce0;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 15px;
             outline: none;
+        }
+
+        .otp-box {
+            background: #e8f0fe;
+            border: 1px dashed #1a73e8;
+            padding: 12px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            text-align: center;
         }
 
         .btn-submit {
@@ -121,7 +130,7 @@
             background: #1a73e8;
             color: #ffffff;
             border: none;
-            border-radius: 14px;
+            border-radius: 16px;
             font-size: 15px;
             font-weight: 700;
             cursor: pointer;
@@ -302,7 +311,7 @@
 </head>
 <body>
 
-    <!-- 1. شاشة تسجيل الدخول -->
+    <!-- 1. شاشة تسجيل الدخول وإنشاء الحساب مع استقبال الـ OTP مباشرة -->
     <div id="loginScreen">
         <div class="login-card">
             <div class="logo-area">
@@ -316,20 +325,27 @@
             </div>
 
             <!-- نموذج تسجيل الدخول -->
-            <form id="loginForm" onsubmit="handleLogin(event)">
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)">
                 <div class="input-group">
                     <label>رقم الهاتف</label>
                     <input type="tel" id="loginPhone" placeholder="07700000000" required>
                 </div>
-                <div class="input-group">
-                    <label>كلمة المرور أو رمز التحقق</label>
-                    <input type="password" id="loginPass" placeholder="••••••••" required>
+                
+                <div id="loginOtpBox" class="hidden">
+                    <div class="otp-box">
+                        <p style="font-size: 12px; color: #1a73e8; font-weight: bold;">رمز التحقق (OTP) التجريبي: 1234</p>
+                    </div>
+                    <div class="input-group">
+                        <label>أدخل رمز التحقق</label>
+                        <input type="text" id="loginOtpInput" placeholder="1234" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold;">
+                    </div>
                 </div>
-                <button type="submit" class="btn-submit">تسجيل الدخول 🚀</button>
+
+                <button type="submit" class="btn-submit" id="loginBtnSubmit">إرسال رمز التحقق 📩</button>
             </form>
 
-            <!-- نموذج إنشاء حساب -->
-            <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+            <!-- نموذج إنشاء حساب جديد -->
+            <form id="registerForm" class="hidden" onsubmit="handleRegisterSubmit(event)">
                 <div class="input-group">
                     <label>الاسم الكامل</label>
                     <input type="text" id="regName" placeholder="أحمد ضياء" required>
@@ -338,11 +354,18 @@
                     <label>رقم الهاتف</label>
                     <input type="tel" id="regPhone" placeholder="07700000000" required>
                 </div>
-                <div class="input-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="regPass" placeholder="8 أحرف على الأقل" minlength="8" required>
+
+                <div id="regOtpBox" class="hidden">
+                    <div class="otp-box">
+                        <p style="font-size: 12px; color: #1a73e8; font-weight: bold;">رمز التحقق (OTP) التجريبي: 1234</p>
+                    </div>
+                    <div class="input-group">
+                        <label>أدخل رمز التحقق (متاح رحلتان مجانيتان)</label>
+                        <input type="text" id="regOtpInput" placeholder="1234" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold;">
+                    </div>
                 </div>
-                <button type="submit" class="btn-submit">إنشاء الحساب ودخول الخريطة ✨</button>
+
+                <button type="submit" class="btn-submit" id="regBtnSubmit">إرسال رمز التحقق 📩</button>
             </form>
         </div>
     </div>
@@ -352,7 +375,7 @@
         <div class="top-control-panel">
             <div class="google-search-bar">
                 <span style="font-size: 18px; color: #5f6368; cursor: pointer;" onclick="searchLocation()">🔍</span>
-                <input type="text" id="searchInput" placeholder="ابحث عن مكان (مثل: المنصور، بغداد)..." onkeypress="handleSearch(event)">
+                <input type="text" id="searchInput" placeholder="ابحث عن مكان (مثل: المنصور، الكرادة)..." onkeypress="handleSearch(event)">
                 <span style="font-size: 20px; cursor: pointer;" onclick="openProfile()">👤</span>
             </div>
 
@@ -396,6 +419,10 @@
         let profileType = 'driving';
         let currentRouteData = null;
 
+        // حالات إرسال رمز الـ OTP
+        let loginOtpSent = false;
+        let regOtpSent = false;
+
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA'; 
 
         function switchAuthMode(mode) {
@@ -414,177 +441,5 @@
             } else {
                 loginForm.classList.add('hidden');
                 registerForm.classList.remove('hidden');
-                tabRegister.classList.add('active');
-                tabLogin.classList.remove('active');
-                subTitle.innerText = 'أنشئ حسابك الجديد (رحلتان مجانيتان)';
-            }
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            const phone = document.getElementById('loginPhone').value.trim();
-            if (!phone) { alert('يرجى إدخال رقم الهاتف!'); return; }
-            
-            isNewAccount = false;
-            localStorage.setItem('xmaps_user', phone);
-            openMapScreen();
-        }
-
-        function handleRegister(event) {
-            event.preventDefault();
-            const name = document.getElementById('regName').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            
-            if (!name || !phone) { alertيرجى ملء كافة الحقول المطلوبة!'); return; }
-
-            isNewAccount = true;
-            localStorage.setItem('xmaps_user', name + ' (' + phone + ')');
-            openMapScreen();
-        }
-
-        function openMapScreen() {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mapScreen').style.display = 'flex';
-
-            setTimeout(() => {
-                initMap();
-                if (map) map.resize();
-            }, 100);
-
-            if (isNewAccount) {
-                document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (<span id="tripCount">${remainingTrips}</span> متبقية)`;
-            } else {
-                document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (غير محدود)`;
-            }
-        }
-
-        function initMap() {
-            if (map) {
-                map.resize();
-                return;
-            }
-            
-            map = new mapboxgl.Map({
-                container: 'map',
-                style: 'mapbox://styles/mapbox/streets-v12',
-                center: userCoords,
-                zoom: 13,
-                dragRotate: false
-            });
-
-            map.on('click', (e) => {
-                destCoords = [e.lngLat.lng, e.lngLat.lat];
-                setDestination(destCoords, `إحداثيات المختارة: ${e.lngLat.lat.toFixed(4)}, ${e.lngLat.lng.toFixed(4)}`);
-            });
-        }
-
-        function searchLocation() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (!query) {
-                alert('يرجى كتابة اسم المكان للبحث!');
-                return;
-            }
-
-            const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}&country=iq`;
-
-            fetch(geocodeUrl)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.features && data.features.length > 0) {
-                        const firstMatch = data.features[0];
-                        destCoords = firstMatch.center;
-                        const placeName = firstMatch.place_name_ar || firstMatch.place_name;
-
-                        map.flyTo({ center: destCoords, zoom: 14 });
-                        setDestination(destCoords, placeName);
-                    } else {
-                        alert('عذراً، لم نتمكن من العثور على هذا المكان!');
-                    }
-                })
-                .catch(err => console.error('خطأ في البحث:', err));
-        }
-
-        function handleSearch(event) {
-            if (event.key === 'Enter') {
-                searchLocation();
-            }
-        }
-
-        function setDestination(coords, nameText) {
-            destCoords = coords;
-            
-            if (destinationMarker) destinationMarker.remove();
-            destinationMarker = new mapboxgl.Marker({ color: '#ea4335' })
-                .setLngLat(destCoords)
-                .addTo(map);
-
-            document.getElementById('searchInput').value = nameText;
-            getRoute(userCoords, destCoords);
-        }
-
-        function getRoute(start, end) {
-            const url = `https://api.mapbox.com/directions/v5/mapbox/${profileType}/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
-
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.routes || data.routes.length === 0) {
-                        alert('عذراً، لم يتم العثور على مسار لهذا الموقع!');
-                        return;
-                    }
-                    currentRouteData = data.routes[0];
-                    const routeGeoJSON = currentRouteData.geometry;
-
-                    if (map.getSource('route')) {
-                        map.getSource('route').setData(routeGeoJSON);
-                    } else {
-                        map.addLayer({
-                            id: 'route',
-                            type: 'line',
-                            source: {
-                                type: 'geojson',
-                                data: {
-                                    type: 'Feature',
-                                    properties: {},
-                                    geometry: routeGeoJSON
-                                }
-                            },
-                            layout: {
-                                'line-join': 'round',
-                                'line-cap': 'round'
-                            },
-                            paint: {
-                                'line-color': '#1a73e8',
-                                'line-width': 6,
-                                'line-opacity': 0.8
-                            }
-                        });
-                    }
-
-                    const distanceKm = (currentRouteData.distance / 1000).toFixed(1);
-                    const durationMin = Math.round(currentRouteData.duration / 60);
-                    
-                    document.getElementById('navTitle').innerText = `المسافة: ${distanceKm} كم`;
-                    document.getElementById('navDetail').innerText = `الوقت المقدر: ${durationMin} دقيقة`;
-                    
-                    document.getElementById('navBanner').style.display = 'flex';
-                })
-                .catch(err => console.log('خطأ في جلب المسار:', err));
-        }
-
-        function speakInstruction() {
-            if (!currentRouteData) {
-                speakText('يرجى اختيار وجهة أولاً على الخريطة أو عبر البحث.');
-                return;
-            }
-            const distanceKm = (currentRouteData.distance / 1000).toFixed(1);
-            const durationMin = Math.round(currentRouteData.duration / 60);
-            speakText(`المسافة إلى الوجهة هي ${distanceKm} كيلومتر، والوقت المقدر للوصول هو ${durationMin} دقيقة.`);
-        }
-
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ar-SA';
-  
+                tabRegister
+        
