@@ -413,10 +413,10 @@
             </div>
 
             <!-- نموذج تسجيل الدخول -->
-            <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+            <div id="loginForm">
                 <div class="input-group">
                     <label>رقم الهاتف</label>
-                    <input type="tel" id="loginPhone" placeholder="07700000000" required>
+                    <input type="tel" id="loginPhone" placeholder="07700000000">
                 </div>
 
                 <div id="loginOtpBox" class="hidden">
@@ -429,18 +429,18 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit" id="loginBtnSubmit">إرسال رمز التحقق 📩</button>
-            </form>
+                <button type="button" class="btn-submit" id="loginBtnSubmit" onclick="handleLoginAction()">إرسال رمز التحقق 📩</button>
+            </div>
 
             <!-- نموذج إنشاء حساب -->
-            <form id="registerForm" class="hidden" onsubmit="handleRegisterSubmit(event)">
+            <div id="registerForm" class="hidden">
                 <div class="input-group">
                     <label>الاسم الكامل</label>
-                    <input type="text" id="regName" placeholder="أحمد ضياء" required>
+                    <input type="text" id="regName" placeholder="أحمد ضياء">
                 </div>
                 <div class="input-group">
                     <label>رقم الهاتف</label>
-                    <input type="tel" id="regPhone" placeholder="07700000000" required>
+                    <input type="tel" id="regPhone" placeholder="07700000000">
                 </div>
 
                 <div id="regOtpBox" class="hidden">
@@ -453,8 +453,8 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit" id="regBtnSubmit">إرسال رمز التحقق 📩</button>
-            </form>
+                <button type="button" class="btn-submit" id="regBtnSubmit" onclick="handleRegisterAction()">إرسال رمز التحقق 📩</button>
+            </div>
         </div>
     </div>
 
@@ -507,7 +507,7 @@
         <div class="profile-card">
             <div class="user-avatar" id="modalAvatar">أ</div>
             <h3 id="modalName">أحمد ضياء</h3>
-            <p id="modalPhone" style="font-size: 13px; color: #5f6368; margin-bottom: 6px;">07806257570</p>
+            <p id="modalPhone" style="font-size: 13px; color: #5f6368; margin-bottom: 6px;"></p>
             <p id="modalTripsInfo" style="font-size: 12px; color: #1a73e8; font-weight: bold; margin-bottom: 20px;"></p>
             <button type="button" class="btn-logout" onclick="logoutUser()">تسجيل الخروج 🚪</button>
             <button type="button" onclick="closeProfileModal()" style="background: #f1f3f4; color: #3c4043; border: none; border-radius: 12px; padding: 10px; width: 100%; font-weight: bold; margin-top: 8px; cursor: pointer;">إغلاق</button>
@@ -562,8 +562,7 @@
             }
         }
 
-        function handleLoginSubmit(event) {
-            event.preventDefault();
+        function handleLoginAction() {
             const phone = document.getElementById('loginPhone').value.trim();
             if (!phone) { alert('يرجى إدخال رقم الهاتف!'); return; }
 
@@ -583,8 +582,11 @@
             }
         }
 
-        function handleRegisterSubmit(event) {
-            event.preventDefault();
+        function handleRegisterAction() {
             const name = document.getElementById('regName').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
-            if (!name || !phone) { alert(
+            if (!name || !phone) { alert('يرجى ملء كافة الحقول!'); return; }
+
+            if (!regOtpSent) {
+                regOtpSent = true;
+                document.getEleme
