@@ -163,7 +163,7 @@
 
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA';
 
-        // التحقق من الذاكرة المحلية عند فتح التطبيق
+        // فحص الذاكرة عند فتح الصفحة
         window.onload = function() {
             const savedUser = localStorage.getItem('xmaps_user');
             if (savedUser) {
@@ -171,12 +171,11 @@
                 userPhone = userData.phone;
                 isNewUser = userData.isNewUser;
                 leftTrips = userData.leftTrips;
-
-                launchAppSession();
+                startAppSession();
             }
         };
 
-        function launchAppSession() {
+        function startAppSession() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appScreen').style.display = 'flex';
 
@@ -187,7 +186,7 @@
             document.getElementById('mAvatar').innerText = ch;
             document.getElementById('mPhone').innerText = userPhone || "07700000000";
 
-            if (isNewUser) {
+            if(isNewUser) {
                 document.getElementById('tripBtn').innerText = `🏁 بدء الرحلة (${leftTrips} متبقية)`;
                 document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
             } else {
@@ -246,6 +245,7 @@
                     const distanceKm = (data.routes[0].distance / 1000).toFixed(1);
                     const durationMin = Math.round(data.routes[0].duration / 60);
                     document.getElementById('destDist').innerText = `المسافة: ${distanceKm} كم - الوقت: ${durationMin} دقيقة`;
+                    
                     speakText(`تم رسم المسافة، المسافة ${distanceKm} كيلومتر والوقت المقدر ${durationMin} دقيقة`);
                 })
                 .catch(err => console.log('خطأ في جلب المسار:', err));
@@ -294,14 +294,11 @@
 
                 isNewUser = (mode === 'register');
                 
-                const userData = {
-                    phone: userPhone,
-                    isNewUser: isNewUser,
-                    leftTrips: leftTrips
-                };
+                // حفظ البيانات بذاكرة الجهاز
+                const userData = { phone: userPhone, isNewUser: isNewUser, leftTrips: leftTrips };
                 localStorage.setItem('xmaps_user', JSON.stringify(userData));
 
-                launchAppSession();
+                startAppSession();
             }
         }
 
@@ -329,6 +326,7 @@
                         leftTrips--;
                         document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
                         
+                        // تحديث الرحلات المحفوظة
                         const userData = JSON.parse(localStorage.getItem('xmaps_user'));
                         if(userData) {
                             userData.leftTrips = leftTrips;
