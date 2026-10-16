@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Xmaps - خرائط الملاحة الذكية</title>
 
-    <!-- استدعاء مكتبات D3.js و TopoJSON للخريطة العالمية والمحلية -->
+    <!-- استدعاء مكتبات D3.js و TopoJSON -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 
@@ -43,16 +43,16 @@
         .login-card {
             background: #ffffff;
             width: 100%;
-            max-width: 420px;
-            padding: 28px 24px;
-            border-radius: 28px;
+            max-width: 400px;
+            padding: 24px;
+            border-radius: 24px;
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
             text-align: center;
             margin: auto;
         }
 
         .logo-area h1 {
-            font-size: 28px;
+            font-size: 26px;
             color: #1a73e8;
             font-weight: 800;
         }
@@ -61,15 +61,15 @@
             font-size: 13px;
             color: #5f6368;
             margin-top: 4px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .main-tabs {
             display: flex;
             background: #f1f3f4;
-            border-radius: 16px;
+            border-radius: 14px;
             padding: 4px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .main-tab-btn {
@@ -80,7 +80,7 @@
             font-size: 14px;
             font-weight: 700;
             color: #5f6368;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
         }
 
@@ -91,7 +91,7 @@
         }
 
         .input-group {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             text-align: right;
         }
 
@@ -106,9 +106,9 @@
 
         .input-group input {
             width: 100%;
-            padding: 13px 16px;
+            padding: 12px 14px;
             border: 1px solid #dadce0;
-            border-radius: 14px;
+            border-radius: 12px;
             font-size: 15px;
             outline: none;
         }
@@ -116,27 +116,27 @@
         .otp-box {
             background: #e8f0fe;
             border: 1px dashed #1a73e8;
-            padding: 12px;
-            border-radius: 14px;
-            margin-bottom: 16px;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 12px;
             text-align: center;
         }
 
         .btn-submit {
             width: 100%;
-            padding: 14px;
+            padding: 13px;
             background: #1a73e8;
             color: #ffffff;
             border: none;
-            border-radius: 16px;
+            border-radius: 12px;
             font-size: 15px;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(26, 115, 232, 0.35);
-            margin-top: 6px;
+            margin-top: 4px;
         }
 
-        /* واجهة الخريطة */
+        /* واجهة الخريطة الرئيسية */
         #mapScreen {
             height: 100%;
             width: 100%;
@@ -177,7 +177,6 @@
             text-align: right;
         }
 
-        /* قائمة اقتراحات البحث الفورية */
         #suggestionsList {
             position: absolute;
             top: 52px;
@@ -247,7 +246,6 @@
             display: block;
         }
 
-        /* شريط التوجيه الصوتي والحي */
         .navigation-banner {
             position: absolute;
             top: 15px;
@@ -291,7 +289,6 @@
             white-space: nowrap;
         }
 
-        /* أزرار عائمة على الخريطة */
         .floating-buttons {
             position: absolute;
             bottom: 20px;
@@ -318,7 +315,6 @@
 
         .fab-report { background: #fee2e2; color: #dc2626; }
 
-        /* شريط الإجراءات السفلي */
         .bottom-actions {
             background: #ffffff;
             padding: 12px;
@@ -346,7 +342,7 @@
         .btn-drive-mode { background: #1e293b; color: #ffffff; }
         .btn-start-trip { background: #16a34a; color: #ffffff; }
 
-        /* نافذة الملف الشخصي والـ Avatar */
+        /* نافذة الملف الشخصي */
         #profileModal {
             position: fixed;
             top: 0;
@@ -386,9 +382,6 @@
             box-shadow: 0 4px 12px rgba(26,115,232,0.3);
         }
 
-        .profile-card h3 { font-size: 18px; color: #202124; margin-bottom: 4px; }
-        .profile-card p { font-size: 13px; color: #5f6368; margin-bottom: 20px; }
-
         .btn-logout {
             background: #dc2626;
             color: #ffffff;
@@ -406,7 +399,7 @@
 </head>
 <body>
 
-    <!-- 1. شاشة المصادقة (تسجيل الدخول / إنشاء حساب) -->
+    <!-- 1. شاشة تسجيل الدخول وإنشاء الحساب -->
     <div id="loginScreen">
         <div class="login-card">
             <div class="logo-area">
@@ -425,13 +418,13 @@
                     <label>رقم الهاتف</label>
                     <input type="tel" id="loginPhone" placeholder="07700000000" required>
                 </div>
-                
+
                 <div id="loginOtpBox" class="hidden">
                     <div class="otp-box">
-                        <p style="font-size: 12px; color: #1a73e8; font-weight: bold;">رمز التحقق التجريبي: 1234</p>
+                        <p style="font-size: 12px; color: #1a73e8; font-weight: bold;">رمز التحقق (OTP): 1234</p>
                     </div>
                     <div class="input-group">
-                        <label>أدخل رمز التحقق (OTP)</label>
+                        <label>أدخل رمز التحقق</label>
                         <input type="text" id="loginOtpInput" placeholder="1234" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold;">
                     </div>
                 </div>
@@ -452,10 +445,10 @@
 
                 <div id="regOtpBox" class="hidden">
                     <div class="otp-box">
-                        <p style="font-size: 12px; color: #1a73e8; font-weight: bold;">رمز التحقق التجريبي: 1234</p>
+                        <p style="font-size: 12px; color: #1a73e8; font-weight: bold;">رمز التحقق (OTP): 1234</p>
                     </div>
                     <div class="input-group">
-                        <label>أدخل رمز التحقق (متاح رحلتان مجانيتان)</label>
+                        <label>أدخل رمز التحقق (رحلتان مجانيتان)</label>
                         <input type="text" id="regOtpInput" placeholder="1234" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold;">
                     </div>
                 </div>
@@ -465,10 +458,133 @@
         </div>
     </div>
 
-    <!-- 2. واجهة الخريطة والتحكم -->
+    <!-- 2. واجهة الخريطة -->
     <div id="mapScreen">
         <div class="top-control-panel">
             <div class="search-bar-container">
                 <span style="font-size: 18px; color: #5f6368; cursor: pointer;" onclick="searchLocation()">🔍</span>
-                <input type
-                    
+                <input type="text" id="searchInput" placeholder="ابحث عن مكان (بغداد، المنصور، أربيل)..." oninput="showSuggestions(this.value)" onkeypress="handleSearchKey(event)">
+                <div id="suggestionsList"></div>
+                <div onclick="openProfileModal()" title="الملف الشخصي" style="cursor: pointer; width: 32px; height: 32px; background: #1a73e8; color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 14px;" id="avatarInitial">أ</div>
+            </div>
+
+            <div class="vehicle-selector">
+                <button type="button" class="vehicle-btn active" id="btnCar" onclick="setVehicle('driving')">🚗 سيارة</button>
+                <button type="button" class="vehicle-btn" id="btnMoto" onclick="setVehicle('motorcycle')">🏍️ دراجة</button>
+                <button type="button" class="vehicle-btn" id="btnBike" onclick="setVehicle('bicycling')">🚶 مشي</button>
+                <button type="button" class="vehicle-btn" id="btnTaxi" onclick="setVehicle('taxi')">🚕 تاكسي</button>
+                <button type="button" class="vehicle-btn" id="btnTruck" onclick="setVehicle('truck')">🚚 شاحنة</button>
+            </div>
+        </div>
+
+        <div class="map-wrapper">
+            <svg id="d3MapSvg"></svg>
+
+            <div id="navBanner" class="navigation-banner">
+                <div class="nav-instruction">
+                    <h3 id="navTitle">جاهز للملاحة</h3>
+                    <p id="navDetail">اختر وجهة لنطق التعليمات الصوتية</p>
+                </div>
+                <button type="button" class="voice-action-btn" onclick="speakInstruction()">
+                    <span>🔊</span> نطق التوجيه
+                </button>
+            </div>
+
+            <div class="floating-buttons">
+                <button type="button" class="fab-btn fab-report" onclick="reportIncident()" title="تبليغ عن حادث">⚠️</button>
+                <button type="button" class="fab-btn" onclick="resetMapView()" title="توسيط الخريطة">🎯</button>
+            </div>
+        </div>
+
+        <div class="bottom-actions">
+            <button type="button" class="btn-action btn-drive-mode" id="driveModeBtn" onclick="toggleCarMode()">🚘 وضع القيادة</button>
+            <button type="button" class="btn-action btn-start-trip" id="tripBtn" onclick="startTrip()">🏁 بدء الرحلة</button>
+        </div>
+    </div>
+
+    <!-- نافذة الملف الشخصي -->
+    <div id="profileModal">
+        <div class="profile-card">
+            <div class="user-avatar" id="modalAvatar">أ</div>
+            <h3 id="modalName">أحمد ضياء</h3>
+            <p id="modalPhone" style="font-size: 13px; color: #5f6368; margin-bottom: 6px;">07806257570</p>
+            <p id="modalTripsInfo" style="font-size: 12px; color: #1a73e8; font-weight: bold; margin-bottom: 20px;"></p>
+            <button type="button" class="btn-logout" onclick="logoutUser()">تسجيل الخروج 🚪</button>
+            <button type="button" onclick="closeProfileModal()" style="background: #f1f3f4; color: #3c4043; border: none; border-radius: 12px; padding: 10px; width: 100%; font-weight: bold; margin-top: 8px; cursor: pointer;">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        const locationsDB = [
+            { name: "بغداد، العراق", coords: [44.3661, 33.3152] },
+            { name: "المنصور، بغداد", coords: [44.3411, 33.3185] },
+            { name: "الكرادة، بغداد", coords: [44.4210, 33.2980] },
+            { name: "الأعظمية، بغداد", coords: [44.3812, 33.3750] },
+            { name: "الحارثية، بغداد", coords: [44.3520, 33.3110] },
+            { name: "أربيل، العراق", coords: [44.0090, 36.1901] },
+            { name: "البصرة، العراق", coords: [47.7832, 30.5085] },
+            { name: "الموصل، العراق", coords: [43.1315, 36.3400] },
+            { name: "النجف، العراق", coords: [44.3333, 32.0000] },
+            { name: "كربلاء، العراق", coords: [44.0300, 32.6160] },
+            { name: "دبي، الامارات", coords: [55.2708, 25.2048] },
+            { name: "القاهرة، مصر", coords: [31.2357, 30.0444] },
+            { name: "لندن، بريطانيا", coords: [-0.1278, 51.5074] }
+        ];
+
+        let currentUser = null;
+        let isNewAccount = false;
+        let remainingTrips = 2;
+        let selectedDest = null;
+        let currentVehicle = 'driving';
+        
+        let loginOtpSent = false;
+        let regOtpSent = false;
+
+        function switchAuthMode(mode) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabLogin = document.getElementById('tabLogin');
+            const tabRegister = document.getElementById('tabRegister');
+            const subTitle = document.getElementById('subTitle');
+
+            if (mode === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+                subTitle.innerText = 'تسجيل الدخول إلى حسابك';
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                tabRegister.classList.add('active');
+                tabLogin.classList.remove('active');
+                subTitle.innerText = 'أنشئ حسابك الجديد (رحلتان مجانيتان)';
+            }
+        }
+
+        function handleLoginSubmit(event) {
+            event.preventDefault();
+            const phone = document.getElementById('loginPhone').value.trim();
+            if (!phone) { alert('يرجى إدخال رقم الهاتف!'); return; }
+
+            if (!loginOtpSent) {
+                loginOtpSent = true;
+                document.getElementById('loginOtpBox').classList.remove('hidden');
+                document.getElementById('loginPhone').disabled = true;
+                document.getElementById('loginBtnSubmit').innerText = 'تأكيد الرمز والدخول 🚀';
+                alert('تم إرسال رمز التحقق (الرمز: 1234)');
+            } else {
+                const otp = document.getElementById('loginOtpInput').value.trim();
+                if (otp !== '1234') { alert('رمز التحقق غير صحيح! الرمز هو 1234'); return; }
+                
+                currentUser = { name: "مستخدم Xmaps", phone: phone };
+                isNewAccount = false;
+                completeLogin();
+            }
+        }
+
+        function handleRegisterSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            if (!name || !phone) { alert(
