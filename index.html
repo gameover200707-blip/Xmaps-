@@ -117,11 +117,11 @@
             </div>
 
             <div class="vehicles-bar">
-                <button class="v-chip active" id="chipCar" onclick="setVeh(this, 'driving')">🚗 سيارة</button>
-                <button class="v-chip" id="chipMoto" onclick="setVeh(this, 'driving')">🏍️ دراجة</button>
-                <button class="v-chip" id="chipWalk" onclick="setVeh(this, 'walking')">🚶 مشي</button>
-                <button class="v-chip" id="chipTaxi" onclick="setVeh(this, 'driving')">🚕 تاكسي</button>
-                <button class="v-chip" id="chipTruck" onclick="setVeh(this, 'driving')">🚚 شاحنة</button>
+                <button class="v-chip active" onclick="setVeh(this, 'driving')">🚗 سيارة</button>
+                <button class="v-chip" onclick="setVeh(this, 'driving')">🏍️ دراجة</button>
+                <button class="v-chip" onclick="setVeh(this, 'walking')">🚶 مشي</button>
+                <button class="v-chip" onclick="setVeh(this, 'driving')">🚕 تاكسي</button>
+                <button class="v-chip" onclick="setVeh(this, 'driving')">🚚 شاحنة</button>
             </div>
         </div>
 
@@ -172,7 +172,7 @@
         let destMarker = null;
         let userCoords = [44.3661, 33.3152]; // بغداد افتراضياً
         let destCoords = null;
-        let travelMode = 'driving'; // driving أو walking أو cycling
+        let travelMode = 'driving';
 
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA';
 
@@ -189,7 +189,9 @@
                 zoom: 13
             });
 
-            // النقر على الخريطة لتحديد الوجهة ورسم المسار المنحني عبر الشوارع الحقيقية
+            // إضافة علامة لموقع المستخدم الافتراضي
+            userMarker = new mapboxgl.Marker({ color: '#1a73e8' }).setLngLat(userCoords).addTo(map);
+
             map.on('click', (e) => {
                 destCoords = [e.lngLat.lng, e.lngLat.lat];
                 
@@ -200,12 +202,11 @@
                 document.getElementById('destTitle').innerText = currentDest;
                 document.getElementById('navBanner').style.display = 'flex';
 
-                // جلب ورسم المسار الحقيقي المتناسق مع الشوارع
+                // جلب مسار التوجيه الفعلي وعرضه
                 getRoute(userCoords, destCoords);
             });
         }
 
-        // دالة جلب مسار التوجيه الحقيقي (تجنب الخطوط العدلة عبر الـ Directions API)
         function getRoute(start, end) {
             const url = `https://api.mapbox.com/directions/v5/mapbox/${travelMode}/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
 
@@ -222,169 +223,4 @@
                             id: 'route',
                             type: 'line',
                             source: {
-                                type: 'geojson',
-                                data: {
-                                    type: 'Feature',
-                                    properties: {},
-                                    geometry: routeGeoJSON
-                                }
-                            },
-                            layout: {
-                                'line-join': 'round',
-                                'line-cap': 'round'
-                            },
-                            paint: {
-                                'line-color': '#1a73e8',
-                                'line-width': 6,
-                                'line-opacity': 0.85
-                            }
-                        });
-                    }
-
-                    const distanceKm = (data.routes[0].distance / 1000).toFixed(1);
-                    const durationMin = Math.round(data.routes[0].duration / 60);
-                    document.getElementById('destDist').innerText = `المسافة: ${distanceKm} كم - الوقت المقدر: ${durationMin} دقيقة`;
-                    speakText(`تم رسم المسار بنجاح، المسافة ${distanceKm} كيلومتر`);
-                })
-                .catch(err => console.log('خطأ في جلب المسار:', err));
-        }
-
-        function forceReloadMap() {
-            if (map) {
-                map.remove();
-                map = null;
-            }
-            initMap();
-            alert('تم إعادة تحميل الخريطة وتحديثها بنجاح!');
-        }
-
-        function setMode(m) {
-            mode = m;
-            step = 0;
-            document.getElementById('otpWrap').classList.add('hidden');
-            document.getElementById('phoneInp').disabled = false;
-            document.getElementById('passInp').disabled = false;
-            document.getElementById('submitBtn').innerText = 'إرسال رمز التحقق 📩';
-
-            if(m === 'login') {
-                document.getElementById('tabL').classList.add('active');
-                document.getElementById('tabR').classList.remove('active');
-                document.getElementById('subTxt').innerText = 'تسجيل الدخول إلى حسابك';
-            } else {
-                document.getElementById('tabR').classList.add('active');
-                document.getElementById('tabL').classList.remove('active');
-                document.getElementById('subTxt').innerText = 'إنشاء حساب جديد (رحلتان مجانيتان)';
-            }
-        }
-
-        function handleAuth() {
-            const phone = document.getElementById('phoneInp').value.trim();
-            const pass = document.getElementById('passInp').value.trim();
-
-            if(!phone || !pass) { alert('يرجى إدخال رقم الهاتف وكلمة المرور'); return; }
-
-            if(step === 0) {
-                step = 1;
-                userPhone = phone;
-                document.getElementById('otpWrap').classList.remove('hidden');
-                document.getElementById('phoneInp').disabled = true;
-                document.getElementById('passInp').disabled = true;
-                document.getElementById('submitBtn').innerText = 'تأكيد الرمز والدخول 🚀';
-            } else {
-                const otp = document.getElementById('otpInp').value.trim();
-                if(otp !== '1234') { alert('رمز التحقق خاطئ! الرمز هو 1234'); return; }
-
-                isNewUser = (mode === 'register');
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('appScreen').style.display = 'flex';
-
-                setTimeout(() => {
-                    initMap();
-                }, 300);
-
-                const ch = userPhone.slice(-1);
-                document.getElementById('userAvatar').innerText = ch;
-                document.getElementById('mAvatar').innerText = ch;
-                document.getElementById('mPhone').innerText = userPhone;
-
-                if(isNewUser) {
-                    document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (<span id="tCnt">${leftTrips}</span> متبقية)`;
-                    document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
-                } else {
-                    document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (غير محدود)`;
-                    document.getElementById('mTrips').innerText = `حساب مسجل (غير محدود)`;
-                }
-            }
-        }
-
-        function searchPlace() {
-            const query = document.getElementById('searchBox').value.trim();
-            if(!query) return;
-            currentDest = query;
-            document.getElementById('destTitle').innerText = query;
-            document.getElementById('navBanner').style.display = 'flex';
-            speakText(`تم تحديد الوجهة نحو ${query}`);
-        }
-
-        function setVeh(el, tMode) {
-            document.querySelectorAll('.v-chip').forEach(c => c.classList.remove('active'));
-            if(el && el.classList) el.classList.add('active');
-            travelMode = tMode;
-
-            // إعادة حساب المسار بناءً على وسيلة النقل المختارة
-            if (userCoords && destCoords) {
-                getRoute(userCoords, destCoords);
-            }
-        }
-
-        function startTrip() {
-            if(!destCoords) {
-                alert('يرجى النقر على الخريطة أولاً لتحديد الوجهة ورسم المسار!');
-                return;
-            }
-
-            if(isNewUser) {
-                if(leftTrips > 0) {
-                    leftTrips--;
-                    document.getElementById('tCnt').innerText = leftTrips;
-                    document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
-                    alert(`🏁 بدء الملاحة نحو الوجهة! (تبقت لديك ${leftTrips} رحلات)`);
-                } else {
-                    alert('⚠️ لقد استنفذت الرحلات المجانية لحسابك الجديد!');
-                }
-            } else {
-                alert(`🏁 بدء الملاحة نحو الوجهة بنجاح!`);
-            }
-        }
-
-        function locateUser() {
-            if(navigator.geolocation && map) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    userCoords = [pos.coords.longitude, pos.coords.latitude];
-                    map.flyTo({ center: userCoords, zoom: 15 });
-                    if(userMarker) userMarker.remove();
-                    userMarker = new mapboxgl.Marker({ color: '#1a73e8' }).setLngLat(userCoords).addTo(map);
-                    
-                    if(destCoords) {
-                        getRoute(userCoords, destCoords);
-                    }
-                }, () => { alert('يرجى السماح بصلاحية الوصول للموقع (GPS)'); });
-            } else {
-                alert('خدمة تحديد الموقع غير مدعومة');
-            }
-        }
-
-        function speakText(txt) {
-            if('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(txt);
-                u.lang = 'ar-SA';
-                window.speechSynthesis.speak(u);
-            }
-        }
-
-        function openProfile() { document.getElementById('profilePopup').style.display = 'flex'; }
-        function closeProfile() { document.getElementById('profilePopup').style.display = 'none'; }
-    </script>
-</body>
-</html>
+        
