@@ -163,7 +163,7 @@
 
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA';
 
-        // التحقق من وجود حساب مخزن مسبقاً في الذاكرة عند فتح التطبيق
+        // التحقق من الذاكرة المحلية عند فتح التطبيق
         window.onload = function() {
             const savedUser = localStorage.getItem('xmaps_user');
             if (savedUser) {
@@ -172,26 +172,29 @@
                 isNewUser = userData.isNewUser;
                 leftTrips = userData.leftTrips;
 
-                // تخطي شاشة الدخول والدخول مباشرة للتطبيق
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('appScreen').style.display = 'flex';
-
-                setTimeout(() => { initMap(); }, 300);
-
-                const ch = userPhone.slice(-1);
-                document.getElementById('userAvatar').innerText = ch;
-                document.getElementById('mAvatar').innerText = ch;
-                document.getElementById('mPhone').innerText = userPhone;
-
-                if (isNewUser) {
-                    document.getElementById('tripBtn').innerText = `🏁 بدء الرحلة (${leftTrips} متبقية)`;
-                    document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
-                } else {
-                    document.getElementById('tripBtn').innerText = `🏁 بدء الرحلة`;
-                    document.getElementById('mTrips').innerText = `حساب مسجل (غير محدود)`;
-                }
+                launchAppSession();
             }
         };
+
+        function launchAppSession() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'flex';
+
+            setTimeout(() => { initMap(); }, 300);
+
+            const ch = userPhone ? userPhone.slice(-1) : 'أ';
+            document.getElementById('userAvatar').innerText = ch;
+            document.getElementById('mAvatar').innerText = ch;
+            document.getElementById('mPhone').innerText = userPhone || "07700000000";
+
+            if (isNewUser) {
+                document.getElementById('tripBtn').innerText = `🏁 بدء الرحلة (${leftTrips} متبقية)`;
+                document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
+            } else {
+                document.getElementById('tripBtn').innerText = `🏁 بدء الرحلة`;
+                document.getElementById('mTrips').innerText = `حساب مسجل (غير محدود)`;
+            }
+        }
 
         function initMap() {
             if (map) { map.resize(); return; }
@@ -291,7 +294,6 @@
 
                 isNewUser = (mode === 'register');
                 
-                // حفظ بيانات المستخدم في ذاكرة الجهاز (LocalStorage)
                 const userData = {
                     phone: userPhone,
                     isNewUser: isNewUser,
@@ -299,23 +301,7 @@
                 };
                 localStorage.setItem('xmaps_user', JSON.stringify(userData));
 
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('appScreen').style.display = 'flex';
-
-                setTimeout(() => { initMap(); }, 300);
-
-                const ch = userPhone.slice(-1);
-                document.getElementById('userAvatar').innerText = ch;
-                document.getElementById('mAvatar').innerText = ch;
-                document.getElementById('mPhone').innerText = userPhone;
-
-                if(isNewUser) {
-                    document.getElementById('tripBtn').innerText = `🏁 بدء الرحلة (${leftTrips} متبقية)`;
-                    document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
-                } else {
-                    document.getElementById('tripBtn').innerText = `🏁 بدء الرحلة`;
-                    document.getElementById('mTrips').innerText = `حساب مسجل (غير محدود)`;
-                }
+                launchAppSession();
             }
         }
 
@@ -343,7 +329,6 @@
                         leftTrips--;
                         document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
                         
-                        // تحديث عدد الرحلات في الذاكرة المحلية
                         const userData = JSON.parse(localStorage.getItem('xmaps_user'));
                         if(userData) {
                             userData.leftTrips = leftTrips;
@@ -388,8 +373,10 @@
         function openProfile() { document.getElementById('profilePopup').style.display = 'flex'; }
         function closeProfile() { document.getElementById('profilePopup').style.display = 'none'; }
 
-        // دالة تسجيل الخروج ومسح الذاكرة المحلية
         function logoutUser() {
             localStorage.removeItem('xmaps_user');
             location.reload();
-     
+        }
+    </script>
+</body>
+</html>
