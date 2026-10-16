@@ -143,7 +143,7 @@
         <div class="top-panel">
             <div class="search-row">
                 <span style="cursor: pointer;" onclick="searchLoc()">🔍</span>
-                <input type="text" id="searchInput" placeholder="ابحث — مثال: كربلاء، برج إيفل..." oninput="filterSuggestions(this.value)">
+                <input type="text" id="searchInput" placeholder="ابحث — مثال: كربلاء، بغداد..." oninput="filterSuggestions(this.value)">
                 <div id="suggestions"></div>
                 <div onclick="openProfile()" style="cursor: pointer; width: 36px; height: 36px; background: #1a73e8; color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 14px;" id="userInitial">أ</div>
             </div>
@@ -168,7 +168,7 @@
             </div>
 
             <div class="float-btns">
-                <button class="f-btn" id="voiceToggleBtn" onclick="toggleVoice()" title="تشغيل/إيقاف الصوت" style="font-size:14px; font-weight:bold; background:#16a34a; color:#fff;">🔊 الصوت: مفعّل</button>
+                <button class="f-btn" id="voiceToggleBtn" onclick="toggleVoice()" title="تشغيل/إيقاف الصوت" style="font-size:14px; font-weight:bold; background:#16a34a; color:#fff;">🔊 الصوت</button>
                 <button class="f-btn f-report" onclick="reportIncident()" title="تبليغ عن حادث">⚠️</button>
                 <button class="f-btn" onclick="resetMap()" title="توسيط الخريطة">🎯</button>
             </div>
@@ -208,7 +208,6 @@
             { name: "لندن، بريطانيا", coords: [-0.1278, 51.5074] }
         ];
 
-        // قاعدة بيانات المستخدمين المحلية
         let usersDB = JSON.parse(localStorage.getItem('xmaps_users') || '{}');
 
         let currentUser = null;
@@ -220,6 +219,7 @@
         let currentVehicle = 'car';
         let currentInstruction = 'جاهز للملاحة';
         let driveMode = false;
+        let voiceEnabled = true;
 
         function switchMode(mode) {
             const loginForm = document.getElementById('loginForm');
@@ -358,4 +358,4 @@
                 .attr("cx", projection(loc.coords)[0]).attr("cy", projection(loc.coords)[1])
                 .attr("r", 8).attr("fill", "#ea4335").attr("stroke", "#fff").attr("stroke-width", 2);
 
-            gGroup.
+            gGroup.selectAll(".route").
