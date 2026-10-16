@@ -234,34 +234,6 @@
             align-items: center;
         }
 
-        .navigation-banner {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            left: 15px;
-            background: #1e293b;
-            color: #ffffff;
-            padding: 14px 18px;
-            border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            z-index: 1001;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .nav-instruction h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #38bdf8;
-            margin-bottom: 2px;
-        }
-
-        .nav-instruction p {
-            font-size: 13px;
-            color: #cbd5e1;
-        }
-
         .bottom-actions {
             background: #ffffff;
             padding: 12px;
@@ -332,8 +304,8 @@
     <div id="mapScreen">
         <div class="top-control-panel">
             <div class="google-search-bar">
-                <span style="font-size: 18px; color: #5f6368; cursor: pointer;" onclick="searchLocation()">🔍</span>
-                <input type="text" id="searchInput" placeholder="ابحث عن مكان (مثل: المنصور، بغداد)..." onkeypress="handleSearch(event)">
+                <span style="font-size: 18px; color: #5f6368;">🔍</span>
+                <input type="text" id="searchInput" placeholder="اضغط على الخريطة لتحديد الوجهة و رسم المسار" readonly>
                 <span style="font-size: 20px; cursor: pointer;" onclick="openProfile()">👤</span>
             </div>
 
@@ -346,15 +318,6 @@
 
         <div class="map-wrapper">
             <div id="map"></div>
-            
-            <div id="navBanner" class="navigation-banner">
-                <div class="nav-instruction">
-                    <h3 id="navTitle">جاري توجيه الرحلة...</h3>
-                    <p id="navDetail">ابق على المسار الرئيسي</p>
-                </div>
-                <button onclick="speakInstruction()" style="background: #38bdf8; border: none; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; font-size: 16px;" title="إعادة الصوت">🔊</button>
-            </div>
-
             <button class="gps-fab" onclick="locateUser()" title="موقعي الحالي">📍</button>
         </div>
 
@@ -372,10 +335,9 @@
         let map = null;
         let userMarker = null;
         let destinationMarker = null;
-        let userCoords = [44.3661, 33.3152]; // بغداد
+        let userCoords = [44.3661, 33.3152]; // الافتراضي بغداد
         let destCoords = null;
         let profileType = 'driving';
-        let currentRouteData = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA'; 
 
@@ -393,61 +355,24 @@
                 dragRotate: false
             });
 
+            // النقر على الخريطة لتحديد الوجهة ورسم المسار فوراً
             map.on('click', (e) => {
                 destCoords = [e.lngLat.lng, e.lngLat.lat];
-                setDestination(destCoords, `إحداثيات المختارة: ${e.lngLat.lat.toFixed(4)}, ${e.lngLat.lng.toFixed(4)}`);
+                
+                // تحديث مكان الدبوس الأحمر
+                if (destinationMarker) destinationMarker.remove();
+                destinationMarker = new mapboxgl.Marker({ color: '#ea4335' })
+                    .setLngLat(destCoords)
+                    .addTo(map);
+
+                document.getElementById('searchInput').value = `وجهة مختارة: ${e.lngLat.lat.toFixed(4)}, ${e.lngLat.lng.toFixed(4)}`;
+                
+                // رسم مسار التوجيه
+                getRoute(userCoords, destCoords);
             });
         }
 
-        // دالة البحث عن مكان بالاسم باستخدام Mapbox Geocoding API
-        function searchLocation() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (!query) {
-                alert('يرجى كتابة اسم المكان للبحث!');
-                return;
-            }
-
-            const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}&country=iq`;
-
-            fetch(geocodeUrl)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.features && data.features.length > 0) {
-                        const firstMatch = data.features[0];
-                        destCoords = firstMatch.center; // [lng, lat]
-                        const placeName = firstMatch.place_name_ar || firstMatch.place_name;
-
-                        // حرك الخريطة إلى المكان المكتشف
-                        map.flyTo({ center: destCoords, zoom: 14 });
-                        setDestination(destCoords, placeName);
-                    } else {
-                        alert('عذراً، لم نتمكن من العثور على هذا المكان! حاول كتابة الاسم بشكل أدق.');
-                    }
-                })
-                .catch(err => {
-                    console.error('خطأ في البحث:', err);
-                    alert('حدث خطأ أثناء البحث، يرجى المحاولة مرة أخرى.');
-                });
-        }
-
-        function handleSearch(event) {
-            if (event.key === 'Enter') {
-                searchLocation();
-            }
-        }
-
-        function setDestination(coords, nameText) {
-            destCoords = coords;
-            
-            if (destinationMarker) destinationMarker.remove();
-            destinationMarker = new mapboxgl.Marker({ color: '#ea4335' })
-                .setLngLat(destCoords)
-                .addTo(map);
-
-            document.getElementById('searchInput').value = nameText;
-            getRoute(userCoords, destCoords);
-        }
-
+        // دالة لجلب ورسم خط المسار بين نقطة البداية والوجهة باستخدام Mapbox Directions API
         function getRoute(start, end) {
             const url = `https://api.mapbox.com/directions/v5/mapbox/${profileType}/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
 
@@ -458,9 +383,9 @@
                         alert('عذراً، لم يتم العثور على مسار لهذا الموقع!');
                         return;
                     }
-                    currentRouteData = data.routes[0];
-                    const routeGeoJSON = currentRouteData.geometry;
+                    const routeGeoJSON = data.routes[0].geometry;
 
+                    // إذا كان المسار مرسوماً مسبقاً، قم بحذفه وتحديثه
                     if (map.getSource('route')) {
                         map.getSource('route').setData(routeGeoJSON);
                     } else {
@@ -487,35 +412,11 @@
                         });
                     }
 
-                    const distanceKm = (currentRouteData.distance / 1000).toFixed(1);
-                    const durationMin = Math.round(currentRouteData.duration / 60);
-                    
-                    document.getElementById('navTitle').innerText = `المسافة: ${distanceKm} كم`;
-                    document.getElementById('navDetail').innerText = `الوقت المقدر: ${durationMin} دقيقة`;
-                    
-                    speakText(`تم رسم المسار. المسافة هي ${distanceKm} كيلومتر، والوقت المقدر هو ${durationMin} دقيقة.`);
+                    const distanceKm = (data.routes[0].distance / 1000).toFixed(1);
+                    const durationMin = Math.round(data.routes[0].duration / 60);
+                    alert(`🧭 تم رسم المسار بنجاح!\nالمسافة: ${distanceKm} كم\nالوقت المقدر: ${durationMin} دقيقة`);
                 })
                 .catch(err => console.log('خطأ في جلب المسار:', err));
-        }
-
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ar-SA';
-                utterance.rate = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function speakInstruction() {
-            if (currentRouteData) {
-                const distanceKm = (currentRouteData.distance / 1000).toFixed(1);
-                const durationMin = Math.round(currentRouteData.duration / 60);
-                speakText(`الوجهة تبعد ${distanceKm} كيلومتر، والوقت المقدر للوصول هو ${durationMin} دقيقة.`);
-            } else {
-                speakText('يرجى اختيار مكان بالبحث أو على الخريطة أولاً.');
-            }
         }
 
         function switchMainTab(tab) {
@@ -584,4 +485,77 @@
         function toggleCarMode() {
             isCarMode = !isCarMode;
             const btn = document.getElementById('driveModeBtn');
-  
+            if (isCarMode) {
+                btn.innerHTML = '✕ خروج';
+                btn.style.background = '#dc2626';
+                alert('تم تفعيل وضع القيادة');
+            } else {
+                btn.innerHTML = '🚘 وضع القيادة';
+                btn.style.background = '#1e293b';
+                alert('العودة للوضع العادي');
+            }
+        }
+
+        function startTrip() {
+            if (!destCoords) { alert('يرجى النقر على الخريطة أولاً لتحديد وجهتك ورسم المسار!'); return; }
+
+            if (isNewAccount) {
+                if (remainingTrips > 0) {
+                    remainingTrips--;
+                    document.getElementById('tripCount').innerText = remainingTrips;
+                    alert('🏁 بدء الملاحة نحو الوجهة بنجاح!\n(تبقت لديك ' + remainingTrips + ' رحلات مجانية)');
+                } else {
+                    alert('⚠️ لقد استنفذت الحد المسموح به لإنشاء الحساب (رحلتان فقط)!');
+                }
+            } else {
+                alert('🏁 بدء الملاحة نحو الوجهة بنجاح (حساب مسجل دخول)!');
+            }
+        }
+
+        function openProfile() {
+            const username = localStorage.getItem('xmaps_user') || 'مستخدم Xmaps';
+            let info = '👤 الملف الشخصي\nالحساب: ' + username;
+            if (isNewAccount) info += '\nالرحلات المتبقية: ' + remainingTrips;
+            alert(info);
+        }
+
+        function setVehicle(type) {
+            document.getElementById('btnCar').classList.remove('active');
+            document.getElementById('btnMoto').classList.remove('active');
+            document.getElementById('btnBike').classList.remove('active');
+            
+            if (type === 'driving') { document.getElementById('btnCar').classList.add('active'); profileType = 'driving'; }
+            else if (type === 'motorcycle') { document.getElementById('btnMoto').classList.add('active'); profileType = 'driving'; }
+            else if (type === 'bicycling') { document.getElementById('btnBike').classList.add('active'); profileType = 'cycling'; }
+
+            // إذا تم تحديد وجهة مسبقاً، أعد رسم المسار بنوع المركبة الجديد
+            if (destCoords) {
+                getRoute(userCoords, destCoords);
+            }
+        }
+
+        function locateUser() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        userCoords = [lng, lat];
+                        
+                        if (map) {
+                            map.flyTo({ center: userCoords, zoom: 16 });
+
+                            if (userMarker) userMarker.remove();
+                            userMarker = new mapboxgl.Marker({ color: '#1a73e8' })
+                                .setLngLat(userCoords)
+                                .addTo(map);
+                        }
+                    },
+                    (error) => alert('يرجى تفعيل صلاحية GPS في جهازك'),
+                    { enableHighAccuracy: true }
+                );
+            }
+        }
+    </script>
+</body>
+</html>
