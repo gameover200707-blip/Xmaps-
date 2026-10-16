@@ -234,6 +234,35 @@
             align-items: center;
         }
 
+        /* شريط التوجيه الصوتي الحي أثناء القيادة */
+        .navigation-banner {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            left: 15px;
+            background: #1e293b;
+            color: #ffffff;
+            padding: 14px 18px;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-instruction h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 2px;
+        }
+
+        .nav-instruction p {
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
         .bottom-actions {
             background: #ffffff;
             padding: 12px;
@@ -318,6 +347,16 @@
 
         <div class="map-wrapper">
             <div id="map"></div>
+            
+            <!-- شريط التوجيه الصوتي والحي -->
+            <div id="navBanner" class="navigation-banner">
+                <div class="nav-instruction">
+                    <h3 id="navTitle">جاري توجيه الرحلة...</h3>
+                    <p id="navDetail">ابق على المسار الرئيسي</p>
+                </div>
+                <button onclick="speakInstruction()" style="background: #38bdf8; border: none; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; font-size: 16px;" title="إعادة الصوت">🔊</button>
+            </div>
+
             <button class="gps-fab" onclick="locateUser()" title="موقعي الحالي">📍</button>
         </div>
 
@@ -338,6 +377,7 @@
         let userCoords = [44.3661, 33.3152]; // الافتراضي بغداد
         let destCoords = null;
         let profileType = 'driving';
+        let currentRouteData = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA'; 
 
@@ -355,11 +395,9 @@
                 dragRotate: false
             });
 
-            // النقر على الخريطة لتحديد الوجهة ورسم المسار فوراً
             map.on('click', (e) => {
                 destCoords = [e.lngLat.lng, e.lngLat.lat];
                 
-                // تحديث مكان الدبوس الأحمر
                 if (destinationMarker) destinationMarker.remove();
                 destinationMarker = new mapboxgl.Marker({ color: '#ea4335' })
                     .setLngLat(destCoords)
@@ -367,12 +405,10 @@
 
                 document.getElementById('searchInput').value = `وجهة مختارة: ${e.lngLat.lat.toFixed(4)}, ${e.lngLat.lng.toFixed(4)}`;
                 
-                // رسم مسار التوجيه
                 getRoute(userCoords, destCoords);
             });
         }
 
-        // دالة لجلب ورسم خط المسار بين نقطة البداية والوجهة باستخدام Mapbox Directions API
         function getRoute(start, end) {
             const url = `https://api.mapbox.com/directions/v5/mapbox/${profileType}/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
 
@@ -383,9 +419,9 @@
                         alert('عذراً، لم يتم العثور على مسار لهذا الموقع!');
                         return;
                     }
-                    const routeGeoJSON = data.routes[0].geometry;
+                    currentRouteData = data.routes[0];
+                    const routeGeoJSON = currentRouteData.geometry;
 
-                    // إذا كان المسار مرسوماً مسبقاً، قم بحذفه وتحديثه
                     if (map.getSource('route')) {
                         map.getSource('route').setData(routeGeoJSON);
                     } else {
@@ -412,11 +448,36 @@
                         });
                     }
 
-                    const distanceKm = (data.routes[0].distance / 1000).toFixed(1);
-                    const durationMin = Math.round(data.routes[0].duration / 60);
-                    alert(`🧭 تم رسم المسار بنجاح!\nالمسافة: ${distanceKm} كم\nالوقت المقدر: ${durationMin} دقيقة`);
+                    const distanceKm = (currentRouteData.distance / 1000).toFixed(1);
+                    const durationMin = Math.round(currentRouteData.duration / 60);
+                    
+                    document.getElementById('navTitle').innerText = `المسافة: ${distanceKm} كم`;
+                    document.getElementById('navDetail').innerText = `الوقت المقدر: ${durationMin} دقيقة`;
+                    
+                    speakText(`تم رسم المسار بنجاح. المسافة هي ${distanceKm} كيلومتر، والوقت المقدر هو ${durationMin} دقيقة.`);
                 })
                 .catch(err => console.log('خطأ في جلب المسار:', err));
+        }
+
+        // دالة التوجيه الصوتي الحي (Text-to-Speech)
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // إيقاف أي كلام سابق
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ar-SA'; // اللغة العربية
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function speakInstruction() {
+            if (currentRouteData) {
+                const distanceKm = (currentRouteData.distance / 1000).toFixed(1);
+                const durationMin = Math.round(currentRouteData.duration / 60);
+                speakText(`الوجهة تبعد ${distanceKm} كيلومتر، والوقت المقدر للوصول هو ${durationMin} دقيقة.`);
+            } else {
+                speakText('يرجى تحديد وجهة على الخريطة أولاً.');
+            }
         }
 
         function switchMainTab(tab) {
@@ -485,78 +546,38 @@
         function toggleCarMode() {
             isCarMode = !isCarMode;
             const btn = document.getElementById('driveModeBtn');
+            const navBanner = document.getElementById('navBanner');
+
             if (isCarMode) {
                 btn.innerHTML = '✕ خروج';
                 btn.style.background = '#dc2626';
-                alert('تم تفعيل وضع القيادة');
+                navBanner.style.display = 'flex';
+                speakText('تم تفعيل وضع القيادة والملاحة الصوتية الحية.');
             } else {
                 btn.innerHTML = '🚘 وضع القيادة';
                 btn.style.background = '#1e293b';
-                alert('العودة للوضع العادي');
+                navBanner.style.display = 'none';
+                speakText('العودة للوضع العادي.');
             }
         }
 
         function startTrip() {
-            if (!destCoords) { alert('يرجى النقر على الخريطة أولاً لتحديد وجهتك ورسم المسار!'); return; }
+            if (!destCoords) { 
+                alert('يرجى النقر على الخريطة أولاً لتحديد وجهتك ورسم المسار!'); 
+                speakText('يرجى تحديد وجهة على الخريطة أولاً.');
+                return; 
+            }
 
             if (isNewAccount) {
                 if (remainingTrips > 0) {
                     remainingTrips--;
                     document.getElementById('tripCount').innerText = remainingTrips;
+                    speakText('بدء الرحلة نحو الوجهة. تم خصم رحلة مجانية واحدة.');
                     alert('🏁 بدء الملاحة نحو الوجهة بنجاح!\n(تبقت لديك ' + remainingTrips + ' رحلات مجانية)');
                 } else {
+                    speakText('لقد استنفذت الحد المسموح به لإنشاء الحساب.');
                     alert('⚠️ لقد استنفذت الحد المسموح به لإنشاء الحساب (رحلتان فقط)!');
                 }
             } else {
-                alert('🏁 بدء الملاحة نحو الوجهة بنجاح (حساب مسجل دخول)!');
-            }
-        }
-
-        function openProfile() {
-            const username = localStorage.getItem('xmaps_user') || 'مستخدم Xmaps';
-            let info = '👤 الملف الشخصي\nالحساب: ' + username;
-            if (isNewAccount) info += '\nالرحلات المتبقية: ' + remainingTrips;
-            alert(info);
-        }
-
-        function setVehicle(type) {
-            document.getElementById('btnCar').classList.remove('active');
-            document.getElementById('btnMoto').classList.remove('active');
-            document.getElementById('btnBike').classList.remove('active');
-            
-            if (type === 'driving') { document.getElementById('btnCar').classList.add('active'); profileType = 'driving'; }
-            else if (type === 'motorcycle') { document.getElementById('btnMoto').classList.add('active'); profileType = 'driving'; }
-            else if (type === 'bicycling') { document.getElementById('btnBike').classList.add('active'); profileType = 'cycling'; }
-
-            // إذا تم تحديد وجهة مسبقاً، أعد رسم المسار بنوع المركبة الجديد
-            if (destCoords) {
-                getRoute(userCoords, destCoords);
-            }
-        }
-
-        function locateUser() {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        userCoords = [lng, lat];
-                        
-                        if (map) {
-                            map.flyTo({ center: userCoords, zoom: 16 });
-
-                            if (userMarker) userMarker.remove();
-                            userMarker = new mapboxgl.Marker({ color: '#1a73e8' })
-                                .setLngLat(userCoords)
-                                .addTo(map);
-                        }
-                    },
-                    (error) => alert('يرجى تفعيل صلاحية GPS في جهازك'),
-                    { enableHighAccuracy: true }
-                );
-            }
-        }
-    </script>
-</body>
-    </html>
-    
+                speakText('بدء الملاحة نحو الوجهة بنجاح.');
+                alert('🏁 بدء الملاحة نحو الوجه
