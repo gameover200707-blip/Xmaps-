@@ -234,7 +234,6 @@
             align-items: center;
         }
 
-        /* شريط التوجيه الصوتي والحي المحدث */
         .navigation-banner {
             position: absolute;
             top: 15px;
@@ -319,11 +318,11 @@
             </div>
 
             <div class="main-tabs">
-                <button class="main-tab-btn active" id="tabLogin" onclick="switchMainTab('login')">تسجيل الدخول</button>
-                <button class="main-tab-btn" id="tabRegister" onclick="switchMainTab('register')">إنشاء حساب جديد</button>
+                <button type="button" class="main-tab-btn active" id="tabLogin" onclick="switchMainTab('login')">تسجيل الدخول</button>
+                <button type="button" class="main-tab-btn" id="tabRegister" onclick="switchMainTab('register')">إنشاء حساب جديد</button>
             </div>
 
-            <form id="authForm" onsubmit="handleSubmit(event)">
+            <form id="authForm" onsubmit="handleAuthSubmit(event)">
                 <div class="input-group">
                     <label>رقم الهاتف</label>
                     <input type="tel" id="phoneNumber" placeholder="07700000000" required>
@@ -354,32 +353,31 @@
             </div>
 
             <div class="vehicle-selector">
-                <button class="vehicle-btn active" id="btnCar" onclick="setVehicle('driving')">🚗 سيارة</button>
-                <button class="vehicle-btn" id="btnMoto" onclick="setVehicle('motorcycle')">🏍️ دراجة</button>
-                <button class="vehicle-btn" id="btnBike" onclick="setVehicle('bicycling')">🚲 بايسكل</button>
+                <button type="button" class="vehicle-btn active" id="btnCar" onclick="setVehicle('driving')">🚗 سيارة</button>
+                <button type="button" class="vehicle-btn" id="btnMoto" onclick="setVehicle('motorcycle')">🏍️ دراجة</button>
+                <button type="button" class="vehicle-btn" id="btnBike" onclick="setVehicle('bicycling')">🚲 بايسكل</button>
             </div>
         </div>
 
         <div class="map-wrapper">
             <div id="map"></div>
             
-            <!-- شريط التوجيه الصوتي البارز -->
             <div id="navBanner" class="navigation-banner">
                 <div class="nav-instruction">
                     <h3 id="navTitle">جاهز للملاحة</h3>
                     <p id="navDetail">اضغط على زر الصوت لسماع التوجيهات</p>
                 </div>
-                <button class="voice-action-btn" onclick="speakInstruction()">
+                <button type="button" class="voice-action-btn" onclick="speakInstruction()">
                     <span>🔊</span> نطق التوجيه
                 </button>
             </div>
 
-            <button class="gps-fab" onclick="locateUser()" title="موقعي الحالي">📍</button>
+            <button type="button" class="gps-fab" onclick="locateUser()" title="موقعي الحالي">📍</button>
         </div>
 
         <div class="bottom-actions">
-            <button class="btn-action btn-drive-mode" id="driveModeBtn" onclick="toggleCarMode()">🚘 وضع القيادة</button>
-            <button class="btn-action btn-start-trip" id="tripBtn" onclick="startTrip()">🏁 بدء الرحلة</button>
+            <button type="button" class="btn-action btn-drive-mode" id="driveModeBtn" onclick="toggleCarMode()">🚘 وضع القيادة</button>
+            <button type="button" class="btn-action btn-start-trip" id="tripBtn" onclick="startTrip()">🏁 بدء الرحلة</button>
         </div>
     </div>
 
@@ -397,6 +395,68 @@
         let currentRouteData = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA'; 
+
+        function switchMainTab(tab) {
+            currentTab = tab;
+            isOtpSent = false;
+            document.getElementById('otpSection').classList.add('hidden');
+            document.getElementById('phoneNumber').disabled = false;
+            document.getElementById('btnSubmit').innerText = 'إرسال رمز التحقق 📩';
+
+            if (tab === 'login') {
+                document.getElementById('tabLogin').classList.add('active');
+                document.getElementById('tabRegister').classList.remove('active');
+                document.getElementById('subTitle').innerText = 'تسجيل الدخول إلى حسابك';
+            } else {
+                document.getElementById('tabRegister').classList.add('active');
+                document.getElementById('tabLogin').classList.remove('active');
+                document.getElementById('subTitle').innerText = 'أنشئ حسابك الجديد (متاح رحلتان فقط)';
+            }
+        }
+
+        function handleAuthSubmit(event) {
+            event.preventDefault();
+            const phone = document.getElementById('phoneNumber').value.trim();
+            
+            if (!phone) { 
+                alert('يرجى إدخال رقم الهاتف أولاً!'); 
+                return; 
+            }
+
+            if (!isOtpSent) {
+                isOtpSent = true;
+                document.getElementById('otpSection').classList.remove('hidden');
+                document.getElementById('phoneNumber').disabled = true;
+                document.getElementById('btnSubmit').innerText = 'تأكيد الرمز والدخول 🚀';
+                alert('تم إرسال رمز التحقق (الرمز التجريبي: 1234)');
+            } else {
+                const otp = document.getElementById('otpCode').value.trim();
+                if (otp !== '1234') {
+                    alert('رمز التحقق غير صحيح! الرمز التجريبي هو 1234');
+                    return;
+                }
+
+                isNewAccount = (currentTab === 'register');
+                localStorage.setItem('xmaps_user', phone);
+                openMapScreen();
+            }
+        }
+
+        function openMapScreen() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mapScreen').style.display = 'flex';
+
+            setTimeout(() => {
+                initMap();
+                if (map) map.resize();
+            }, 100);
+
+            if (isNewAccount) {
+                document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (<span id="tripCount">${remainingTrips}</span> متبقية)`;
+            } else {
+                document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (غير محدود)`;
+            }
+        }
 
         function initMap() {
             if (map) {
@@ -507,13 +567,11 @@
                     document.getElementById('navTitle').innerText = `المسافة: ${distanceKm} كم`;
                     document.getElementById('navDetail').innerText = `الوقت المقدر: ${durationMin} دقيقة`;
                     
-                    // إظهار شريط التوجيه تلقائياً
                     document.getElementById('navBanner').style.display = 'flex';
                 })
                 .catch(err => console.log('خطأ في جلب المسار:', err));
         }
 
-        // دالة تشغيل الصوت التفاعلية (تشتغل بضغطة زر يدوية لتجاوز حظر المتصفح)
         function speakInstruction() {
             if (!currentRouteData) {
                 speakText('يرجى اختيار وجهة أولاً على الخريطة أو عبر البحث.');
@@ -531,65 +589,7 @@
                 utterance.lang = 'ar-SA';
                 utterance.rate = 1.0;
                 window.speechSynthesis.speak(utterance);
-            } else {
-                alert('متصفحك لا يدعم خاصية النطق الصوتي.');
             }
         }
 
-        function switchMainTab(tab) {
-            currentTab = tab;
-            isOtpSent = false;
-            document.getElementById('otpSection').classList.add('hidden');
-            document.getElementById('phoneNumber').disabled = false;
-            document.getElementById('btnSubmit').innerText = 'إرسال رمز التحقق 📩';
-
-            if (tab === 'login') {
-                document.getElementById('tabLogin').classList.add('active');
-                document.getElementById('tabRegister').classList.remove('active');
-                document.getElementById('subTitle').innerText = 'تسجيل الدخول إلى حسابك';
-            } else {
-                document.getElementById('tabRegister').classList.add('active');
-                document.getElementById('tabLogin').classList.remove('active');
-                document.getElementById('subTitle').innerText = 'أنشئ حسابك الجديد (متاح رحلتان فقط)';
-            }
-        }
-
-        function handleSubmit(event) {
-            event.preventDefault();
-            const phone = document.getElementById('phoneNumber').value.trim();
-            
-            if (!phone) { 
-                alert('يرجى إدخال رقم الهاتف أولاً!'); 
-                return; 
-            }
-
-            if (!isOtpSent) {
-                isOtpSent = true;
-                document.getElementById('otpSection').classList.remove('hidden');
-                document.getElementById('phoneNumber').disabled = true;
-                document.getElementById('btnSubmit').innerText = 'تأكيد الرمز والدخول 🚀';
-                alert('تم إرسال رمز التحقق (الرمز التجريبي: 1234)');
-            } else {
-                const otp = document.getElementById('otpCode').value.trim();
-                if (otp !== '1234') {
-                    alert('رمز التحقق غير صحيح! الرمز التجريبي هو 1234');
-                    return;
-                }
-
-                isNewAccount = (currentTab === 'register');
-                localStorage.setItem('xmaps_user', phone);
-                openMapScreen();
-            }
-        }
-
-        function openMapScreen() {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mapScreen').style.display = 'flex';
-
-            setTimeout(() => {
-                initMap();
-                if (map) map.resize();
-            }, 100);
-
-            if (isNewAccount) {
-                document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (<span id="tripCount">${remainin
+        let
