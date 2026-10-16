@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -5,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Xmaps - Mapbox Navigation</title>
 
-    <!-- استدعاء مكتبة وتصميم Mapbox GL JS الإصدار المستقر -->
+    <!-- استدعاء مكتبة وتصميم Mapbox GL JS -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
@@ -285,7 +286,6 @@
                     <input type="tel" id="phoneNumber" placeholder="07700000000" required>
                 </div>
 
-                <!-- قسم الـ OTP المضاف بدقة -->
                 <div id="otpSection" class="hidden">
                     <div class="otp-box">
                         <p style="font-size: 12px; color: #1a73e8; font-weight: bold;">رمز التحقق التجريبي: 1234</p>
@@ -306,7 +306,7 @@
         <div class="top-control-panel">
             <div class="google-search-bar">
                 <span style="font-size: 18px; color: #5f6368;">🔍</span>
-                <input type="text" id="searchInput" placeholder="إلى أين تريد الذهاب؟" onkeypress="handleSearch(event)">
+                <input type="text" id="searchInput" placeholder="ابحث أو انقر على الخريطة لتحديد الوجهة" onkeypress="handleSearch(event)">
                 <span style="font-size: 20px; cursor: pointer;" onclick="openProfile()">👤</span>
             </div>
 
@@ -335,8 +335,9 @@
         let isOtpSent = false;
         let map = null;
         let userMarker = null;
+        let destinationMarker = null; // علامة الوجهة المحددة على الخريطة
+        let selectedDestinationName = '';
 
-        // إدراج مفتاح Mapbox الخاص بك بالشكل الصحيح
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA'; 
 
         function initMap() {
@@ -350,7 +351,24 @@
                 style: 'mapbox://styles/mapbox/streets-v12',
                 center: [44.3661, 33.3152], // بغداد
                 zoom: 13,
-                dragRotate: false // تفعيل السحب السلس بإصبع واحد
+                dragRotate: false
+            });
+
+            // إضافة خاصية النقر على أي مكان بالخريطة لتحديد الوجهة فوراً
+            map.on('click', (e) => {
+                const lngLat = e.lngLat;
+                selectedDestinationName = `إحداثيات: ${lngLat.lat.toFixed(4)}, ${lngLat.lng.toFixed(4)}`;
+                
+                // تحديث حقل البحث بالاسم أو الإحداثيات المختارة
+                document.getElementById('searchInput').value = selectedDestinationName;
+
+                // وضع دبوس أحمر للوجهة المحددة
+                if (destinationMarker) destinationMarker.remove();
+                destinationMarker = new mapboxgl.Marker({ color: '#ea4335' })
+                    .setLngLat([lngLat.lng, lngLat.lat])
+                    .addTo(map);
+
+                alert('📍 تم تحديد الوجهة على الخريطة:\n' + selectedDestinationName);
             });
         }
 
@@ -404,12 +422,9 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mapScreen').style.display = 'flex';
 
-            // ضمان تشغيل الخريطة وتحديث مساحتها بدقة بعد إظهار الحاوية
             setTimeout(() => {
                 initMap();
-                if (map) {
-                    map.resize();
-                }
+                if (map) map.resize();
             }, 100);
 
             if (isNewAccount) {
@@ -436,7 +451,7 @@
 
         function startTrip() {
             const query = document.getElementById('searchInput').value.trim();
-            if (!query) { alert('يرجى كتابة وجهتك في شريط البحث أولاً!'); return; }
+            if (!query) { alert('يرجى تحديد وجهتك إما بالنقر على الخريطة أو بالكتابة في البحث أولاً!'); return; }
 
             if (isNewAccount) {
                 if (remainingTrips > 0) {
