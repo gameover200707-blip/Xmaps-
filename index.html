@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Xmaps - نظام الملاحة الذكي</title>
 
-    <!-- مكتبة Mapbox وتصميمها -->
+    <!-- مكتبة Mapbox وتصميمها الرسميين -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
@@ -13,7 +13,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
         body, html { height: 100%; width: 100%; background: #f0f2f5; overflow: hidden; }
 
-        /* شاشة الدخول */
+        /* شاشة تسجيل الدخول */
         #loginScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #1a73e8, #0d47a1);
@@ -107,7 +107,7 @@
         </div>
     </div>
 
-    <!-- شاشة الخريطة الحقيقية -->
+    <!-- شاشة الخريطة الرئيسية -->
     <div id="appScreen">
         <div class="nav-header">
             <div class="search-row">
@@ -126,6 +126,7 @@
         </div>
 
         <div class="map-box">
+            <!-- حاوية خريطة Mapbox الحقيقية -->
             <div id="map"></div>
 
             <div class="banner" id="navBanner">
@@ -137,7 +138,7 @@
             </div>
 
             <div class="floating-action">
-                <button class="f-btn" onclick="alert('⚠️ تم إرسال التبليغ المروري بنجاح!')" title="حوادث">⚠️</button>
+                <button class="f-btn" onclick="forceReloadMap()" title="تحديث الخريطة">🔄</button>
                 <button class="f-btn" onclick="locateUser()" title="موقعي">🎯</button>
             </div>
         </div>
@@ -166,31 +167,43 @@
         let isNewUser = false;
         let leftTrips = 2;
         let currentDest = "بغداد، العراق";
-        let map, userMarker, destMarker;
+        let map = null;
+        let userMarker = null;
+        let destMarker = null;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA';
 
         function initMap() {
-            if (map) { map.resize(); return; }
-            try {
-                map = new mapboxgl.Map({
-                    container: 'map',
-                    style: 'mapbox://styles/mapbox/streets-v12',
-                    center: [44.3661, 33.3152], // بغداد
-                    zoom: 13
-                });
-
-                map.on('click', (e) => {
-                    const coords = [e.lngLat.lng, e.lngLat.lat];
-                    if (destMarker) destMarker.remove();
-                    destMarker = new mapboxgl.Marker({ color: '#ea4335' }).setLngLat(coords).addTo(map);
-                    currentDest = `خط عرض: ${e.lngLat.lat.toFixed(3)}, خط طول: ${e.lngLat.lng.toFixed(3)}`;
-                    document.getElementById('destTitle').innerText = currentDest;
-                    document.getElementById('navBanner').style.display = 'flex';
-                });
-            } catch (err) {
-                console.log("Mapbox error, loading fallback view");
+            if (map) {
+                map.resize();
+                return;
             }
+
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v12',
+                center: [44.3661, 33.3152], // بغداد افتراضياً
+                zoom: 13
+            });
+
+            map.on('click', (e) => {
+                const coords = [e.lngLat.lng, e.lngLat.lat];
+                if (destMarker) destMarker.remove();
+                destMarker = new mapboxgl.Marker({ color: '#ea4335' }).setLngLat(coords).addTo(map);
+                currentDest = `خط عرض: ${e.lngLat.lat.toFixed(3)}, خط طول: ${e.lngLat.lng.toFixed(3)}`;
+                document.getElementById('destTitle').innerText = currentDest;
+                document.getElementById('navBanner').style.display = 'flex';
+                speakText('تم تحديد الوجهة بنجاح');
+            });
+        }
+
+        function forceReloadMap() {
+            if (map) {
+                map.remove();
+                map = null;
+            }
+            initMap();
+            alert('تم إعادة تحميل الخريطة وتحديثها بنجاح!');
         }
 
         function setMode(m) {
@@ -233,7 +246,10 @@
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appScreen').style.display = 'flex';
 
-                setTimeout(() => { initMap(); }, 200);
+                // تشغيل وتحميل الخريطة بعد إظهار الشاشة لضمان أخذ الأبعاد الصحيحة
+                setTimeout(() => {
+                    initMap();
+                }, 300);
 
                 const ch = userPhone.slice(-1);
                 document.getElementById('userAvatar').innerText = ch;
@@ -286,7 +302,7 @@
                     map.flyTo({ center: coords, zoom: 15 });
                     if(userMarker) userMarker.remove();
                     userMarker = new mapboxgl.Marker({ color: '#1a73e8' }).setLngLat(coords).addTo(map);
-                }, () => { alert('تعذر تحديد موقعك الحالي'); });
+                }, () => { alert('يرجى السماح بصلاحية الوصول للموقع (GPS)'); });
             } else {
                 alert('خدمة تحديد الموقع غير مدعومة');
             }
