@@ -16,42 +16,40 @@
         /* شاشة المصادقة */
         #authScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, #1a73e8, #0d47a1);
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
             display: flex; justify-content: center; align-items: center;
             z-index: 9999; padding: 20px;
         }
         .auth-card {
-            background: #ffffff; width: 100%; max-width: 400px;
-            padding: 28px 24px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center;
+            background: #ffffff; width: 100%; max-width: 380px;
+            padding: 24px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center;
         }
-        .auth-card h1 { color: #1a73e8; font-size: 30px; margin-bottom: 4px; font-weight: 800; }
-        .auth-card p { color: #5f6368; font-size: 14px; margin-bottom: 18px; }
+        .auth-card h1 { color: #1a73e8; font-size: 26px; margin-bottom: 4px; font-weight: 800; }
+        .auth-card p { color: #5f6368; font-size: 13px; margin-bottom: 16px; }
 
-        .tabs-row { display: flex; background: #f1f3f4; border-radius: 14px; padding: 4px; margin-bottom: 18px; }
+        .tabs-row { display: flex; background: #f1f3f4; border-radius: 12px; padding: 4px; margin-bottom: 16px; }
         .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-size: 14px; font-weight: bold; color: #5f6368; border-radius: 10px; cursor: pointer; }
         .tab-btn.active { background: #fff; color: #1a73e8; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
 
         .input-group { margin-bottom: 14px; text-align: right; }
         .input-group label { display: block; font-size: 13px; font-weight: bold; color: #3c4043; margin-bottom: 6px; }
-        .input-group input { width: 100%; padding: 13px; border: 1px solid #dadce0; border-radius: 14px; font-size: 15px; outline: none; background: #f8f9fa; }
-        .input-group input:focus { border-color: #1a73e8; background: #fff; }
-
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 12px; font-size: 15px; outline: none; }
+        
         .otp-alert { background: #e8f0fe; border: 1px dashed #1a73e8; padding: 8px; border-radius: 10px; margin-bottom: 10px; font-size: 12px; color: #1a73e8; font-weight: bold; text-align: center; }
-        .btn-submit { width: 100%; padding: 14px; background: #1a73e8; color: #fff; border: none; border-radius: 14px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 6px; }
-        .btn-submit:hover { background: #1557b0; }
+        .btn-submit { width: 100%; padding: 13px; background: #1a73e8; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 6px; }
 
         /* شاشة الخريطة */
         #mapScreen { height: 100%; width: 100%; display: none; flex-direction: column; position: relative; }
-        .top-panel { background: #fff; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-        .search-row { display: flex; align-items: center; background: #f1f3f4; border-radius: 26px; height: 48px; padding: 0 16px; gap: 10px; border: 1px solid #dadce0; position: relative; }
+        .top-panel { background: #fff; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+        .search-row { display: flex; align-items: center; background: #f1f3f4; border-radius: 24px; height: 46px; padding: 0 16px; gap: 10px; border: 1px solid #dadce0; position: relative; }
         .search-row input { flex: 1; border: none; outline: none; background: transparent; font-size: 15px; text-align: right; }
-
-        #suggestions { position: absolute; top: 52px; right: 0; left: 0; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 1100; max-height: 180px; overflow-y: auto; display: none; }
+        
+        #suggestions { position: absolute; top: 50px; right: 0; left: 0; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 1100; max-height: 180px; overflow-y: auto; display: none; }
         .sug-item { padding: 10px 14px; font-size: 14px; color: #333; cursor: pointer; border-bottom: 1px solid #f1f3f4; text-align: right; }
         .sug-item:hover { background: #e8f0fe; color: #1a73e8; }
 
         .vehicles { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
-        .v-btn { background: #fff; border: 1px solid #dadce0; border-radius: 18px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: #5f6368; cursor: pointer; white-space: nowrap; }
+        .v-btn { background: #fff; border: 1px solid #dadce0; border-radius: 16px; padding: 6px 12px; font-size: 13px; font-weight: 600; color: #5f6368; cursor: pointer; white-space: nowrap; }
         .v-btn.active { background: #1a73e8; color: #fff; border-color: #1a73e8; }
 
         .map-area { flex: 1; position: relative; background: #aad3df; }
@@ -67,7 +65,7 @@
         .f-report { background: #fee2e2; color: #dc2626; }
 
         .bottom-bar { background: #fff; padding: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; gap: 8px; z-index: 1000; }
-        .act-btn { flex: 1; height: 48px; border-radius: 14px; font-size: 14px; font-weight: bold; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .act-btn { flex: 1; height: 46px; border-radius: 14px; font-size: 14px; font-weight: bold; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; }
         .b-drive { background: #1e293b; color: #fff; }
         .b-trip { background: #16a34a; color: #fff; }
 
@@ -96,11 +94,7 @@
             <div id="loginForm">
                 <div class="input-group">
                     <label>رقم الهاتف</label>
-                    <input type="tel" id="loginPhone" placeholder="07XXXXXXXXX">
-                </div>
-                <div class="input-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="loginPass" placeholder="••••••••">
+                    <input type="tel" id="loginPhone" placeholder="07700000000">
                 </div>
                 <div id="loginOtpSection" class="hidden">
                     <div class="otp-alert">رمز التحقق: 1234</div>
@@ -109,7 +103,7 @@
                         <input type="text" id="loginOtpVal" placeholder="1234" maxlength="4" style="text-align: center; letter-spacing: 4px; font-weight: bold;">
                     </div>
                 </div>
-                <button type="button" class="btn-submit" id="loginBtn" onclick="handleLogin()">تسجيل الدخول</button>
+                <button type="button" class="btn-submit" id="loginBtn" onclick="handleLogin()">إرسال رمز التحقق 📩</button>
             </div>
 
             <!-- نموذج إنشاء حساب -->
@@ -120,11 +114,7 @@
                 </div>
                 <div class="input-group">
                     <label>رقم الهاتف</label>
-                    <input type="tel" id="regPhone" placeholder="07XXXXXXXXX">
-                </div>
-                <div class="input-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="regPass" placeholder="8 أحرف على الأقل">
+                    <input type="tel" id="regPhone" placeholder="07700000000">
                 </div>
                 <div id="regOtpSection" class="hidden">
                     <div class="otp-alert">رمز التحقق: 1234 (رحلتان مجانيتان)</div>
@@ -133,7 +123,7 @@
                         <input type="text" id="regOtpVal" placeholder="1234" maxlength="4" style="text-align: center; letter-spacing: 4px; font-weight: bold;">
                     </div>
                 </div>
-                <button type="button" class="btn-submit" id="regBtn" onclick="handleRegister()">إرسال رمز التحقق</button>
+                <button type="button" class="btn-submit" id="regBtn" onclick="handleRegister()">إرسال رمز التحقق 📩</button>
             </div>
         </div>
     </div>
@@ -143,9 +133,9 @@
         <div class="top-panel">
             <div class="search-row">
                 <span style="cursor: pointer;" onclick="searchLoc()">🔍</span>
-                <input type="text" id="searchInput" placeholder="ابحث — مثال: كربلاء، بغداد..." oninput="filterSuggestions(this.value)">
+                <input type="text" id="searchInput" placeholder="ابحث عن بغداد، المنصور، أربيل، البصرة..." oninput="filterSuggestions(this.value)">
                 <div id="suggestions"></div>
-                <div onclick="openProfile()" style="cursor: pointer; width: 36px; height: 36px; background: #1a73e8; color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 14px;" id="userInitial">أ</div>
+                <div onclick="openProfile()" style="cursor: pointer; width: 32px; height: 32px; background: #1a73e8; color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 13px;" id="userInitial">أ</div>
             </div>
 
             <div class="vehicles">
@@ -153,6 +143,7 @@
                 <button class="v-btn" id="vMoto" onclick="setVeh('moto')">🏍️ دراجة</button>
                 <button class="v-btn" id="vWalk" onclick="setVeh('walk')">🚶 مشي</button>
                 <button class="v-btn" id="vTaxi" onclick="setVeh('taxi')">🚕 تاكسي</button>
+                <button class="v-btn" id="vTruck" onclick="setVeh('truck')">🚚 شاحنة</button>
             </div>
         </div>
 
@@ -168,15 +159,14 @@
             </div>
 
             <div class="float-btns">
-                <button class="f-btn" id="voiceToggleBtn" onclick="toggleVoice()" title="تشغيل/إيقاف الصوت" style="font-size:14px; font-weight:bold; background:#16a34a; color:#fff;">🔊 الصوت</button>
                 <button class="f-btn f-report" onclick="reportIncident()" title="تبليغ عن حادث">⚠️</button>
                 <button class="f-btn" onclick="resetMap()" title="توسيط الخريطة">🎯</button>
             </div>
         </div>
 
         <div class="bottom-bar">
-            <button class="act-btn b-drive" onclick="toggleDrive()">🚘 ابدأ الملاحة</button>
-            <button class="act-btn b-trip" id="tripBtn" onclick="startTrip()">🏁 تبليغ ⚠️</button>
+            <button class="act-btn b-drive" onclick="toggleDrive()">🚘 وضع القيادة</button>
+            <button class="act-btn b-trip" onclick="startTrip()">🏁 بدء الرحلة</button>
         </div>
     </div>
 
@@ -208,8 +198,6 @@
             { name: "لندن، بريطانيا", coords: [-0.1278, 51.5074] }
         ];
 
-        let usersDB = JSON.parse(localStorage.getItem('xmaps_users') || '{}');
-
         let currentUser = null;
         let isNewUser = false;
         let remainingTrips = 2;
@@ -218,8 +206,6 @@
         let selectedLocation = null;
         let currentVehicle = 'car';
         let currentInstruction = 'جاهز للملاحة';
-        let driveMode = false;
-        let voiceEnabled = true;
 
         function switchMode(mode) {
             const loginForm = document.getElementById('loginForm');
@@ -239,31 +225,24 @@
                 regForm.classList.remove('hidden');
                 tabReg.classList.add('active');
                 tabLogin.classList.remove('active');
-                sub.innerText = 'إنشاء حساب جديد';
+                sub.innerText = 'أنشئ حسابك الجديد (رحلتان مجانيتان)';
             }
         }
 
         function handleLogin() {
             const phone = document.getElementById('loginPhone').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-
-            if (!phone || !pass) { alert('يرجى إدخال رقم الهاتف وكلمة المرور'); return; }
-
-            const user = usersDB[phone];
-            if (!user) { alert('الرقم غير مسجل — أنشئ حساباً أولاً'); return; }
-            if (user.password !== pass) { alert('كلمة المرور خاطئة'); return; }
+            if (!phone) { alert('يرجى إدخال رقم الهاتف'); return; }
 
             if (!loginOtpSent) {
                 loginOtpSent = true;
                 document.getElementById('loginOtpSection').classList.remove('hidden');
                 document.getElementById('loginPhone').disabled = true;
-                document.getElementById('loginPass').disabled = true;
-                document.getElementById('loginBtn').innerText = 'تأكيد الرمز والدخول';
+                document.getElementById('loginBtn').innerText = 'تأكيد الرمز والدخول 🚀';
             } else {
                 const otp = document.getElementById('loginOtpVal').value.trim();
                 if (otp !== '1234') { alert('رمز التحقق خاطئ! الرمز هو 1234'); return; }
 
-                currentUser = { name: user.name, phone: phone };
+                currentUser = { name: "مستخدم Xmaps", phone: phone };
                 isNewUser = false;
                 initAppSession();
             }
@@ -272,25 +251,17 @@
         function handleRegister() {
             const name = document.getElementById('regName').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
-            const pass = document.getElementById('regPass').value.trim();
-
-            if (!name || !phone || !pass) { alert('يرجى ملء جميع الحقول'); return; }
-            if (pass.length < 8) { alert('كلمة المرور يجب أن تكون 8 أحرف على الأقل'); return; }
-            if (usersDB[phone]) { alert('الرقم مسجل مسبقاً — سجل دخولك'); return; }
+            if (!name || !phone) { alert('يرجى ملء جميع الحقول'); return; }
 
             if (!regOtpSent) {
                 regOtpSent = true;
                 document.getElementById('regOtpSection').classList.remove('hidden');
                 document.getElementById('regName').disabled = true;
                 document.getElementById('regPhone').disabled = true;
-                document.getElementById('regPass').disabled = true;
-                document.getElementById('regBtn').innerText = 'تأكيد الرمز وإنشاء الحساب';
+                document.getElementById('regBtn').innerText = 'تأكيد الرمز ودخول الخريطة ✨';
             } else {
                 const otp = document.getElementById('regOtpVal').value.trim();
                 if (otp !== '1234') { alert('رمز التحقق خاطئ! الرمز هو 1234'); return; }
-
-                usersDB[phone] = { name: name, password: pass, trips: 2 };
-                localStorage.setItem('xmaps_users', JSON.stringify(usersDB));
 
                 currentUser = { name: name, phone: phone };
                 isNewUser = true;
@@ -309,9 +280,11 @@
             document.getElementById('modalPhone').innerText = currentUser.phone;
 
             if (isNewUser) {
-                document.getElementById('modalTrips').innerText = 'الرحلات المجانية المتبقية: 2';
+                document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (<span id="tripCount">${remainingTrips}</span> متبقية)`;
+                document.getElementById('modalTrips').innerText = `الرحلات المجانية المتبقية: ${remainingTrips}`;
             } else {
-                document.getElementById('modalTrips').innerText = 'حساب مسجل دخول (غير محدود)';
+                document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (غير محدود)`;
+                document.getElementById('modalTrips').innerText = `حساب مسجل دخول (غير محدود)`;
             }
 
             setTimeout(initMap, 100);
@@ -320,42 +293,7 @@
         let svg, projection, pathGen, gGroup;
         function initMap() {
             const w = window.innerWidth;
-            const h = window.innerHeight - 160;
+            const h = window.innerHeight - 100;
 
-            svg = d3.select("#d3MapSvg").attr("width", w).attr("height", h);
-            svg.selectAll("*").remove();
-
-            projection = d3.geoMercator().center([44.3661, 33.3152]).scale(65000).translate([w/2, h/2]);
-            pathGen = d3.geoPath().projection(projection);
-            gGroup = svg.append("g");
-
-            svg.call(d3.zoom().scaleExtent([0.5, 20]).on("zoom", (e) => gGroup.attr("transform", e.transform)));
-
-            d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(data => {
-                const countries = topojson.feature(data, data.objects.countries);
-                gGroup.selectAll("path").data(countries.features).enter().append("path")
-                    .attr("d", pathGen).attr("fill", "#e2e8f0").attr("stroke", "#cbd5e1").attr("stroke-width", 0.5);
-                drawMarkers();
-            }).catch(() => drawMarkers());
-        }
-
-        function drawMarkers() {
-            gGroup.selectAll(".marker").data(db).enter().append("circle")
-                .attr("cx", d => projection(d.coords)[0])
-                .attr("cy", d => projection(d.coords)[1])
-                .attr("r", 6).attr("fill", "#1a73e8").attr("stroke", "#fff").attr("stroke-width", 2)
-                .style("cursor", "pointer")
-                .on("click", (e, d) => selectDest(d));
-        }
-
-        function selectDest(loc) {
-            selectedLocation = loc;
-            document.getElementById('searchInput').value = loc.name;
-            document.getElementById('suggestions').style.display = 'none';
-
-            gGroup.selectAll(".pin").remove();
-            gGroup.append("circle").attr("class", "pin")
-                .attr("cx", projection(loc.coords)[0]).attr("cy", projection(loc.coords)[1])
-                .attr("r", 8).attr("fill", "#ea4335").attr("stroke", "#fff").attr("stroke-width", 2);
-
-            gGroup.selectAll(".route").
+            svg = d3.select("#d3MapSvg
+        
