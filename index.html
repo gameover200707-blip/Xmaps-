@@ -48,7 +48,6 @@
         .map-box { flex: 1; position: relative; width: 100%; background: #e5e3df; }
         #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
 
-        /* بانر المسافة والوقت فقط بدون زر نطق أو إحداثيات */
         .banner { position: absolute; top: 15px; right: 15px; left: 15px; background: #1e293b; color: #fff; padding: 14px; border-radius: 12px; display: none; flex-direction: column; gap: 4px; z-index: 101; text-align: center; }
         .banner h4 { color: #38bdf8; font-size: 15px; }
         .banner p { font-size: 13px; color: #cbd5e1; }
@@ -110,7 +109,6 @@
                 <div onclick="openProfile()" style="cursor: pointer; width: 34px; height: 34px; background: #1a73e8; color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 13px;" id="userAvatar">أ</div>
             </div>
 
-            <!-- بدون خيار المشي -->
             <div class="vehicles-bar">
                 <button class="v-chip active" onclick="setVeh(this, 'driving')">🚗 سيارة</button>
                 <button class="v-chip" onclick="setVeh(this, 'driving')">🏍️ دراجة</button>
@@ -144,7 +142,7 @@
             <h3 id="mName">مستخدم Xmaps</h3>
             <p id="mPhone" style="color: #666; font-size: 13px; margin: 5px 0 5px;">07700000000</p>
             <p id="mTrips" style="color: #1a73e8; font-size: 12px; font-weight: bold; margin-bottom: 15px;"></p>
-            <button class="logout" onclick="location.reload()">تسجيل الخروج 🚪</button>
+            <button class="logout" onclick="logoutUser()">تسجيل الخروج 🚪</button>
         </div>
     </div>
 
@@ -164,6 +162,36 @@
         let isTripActive = false;
 
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA';
+
+        // التحقق من وجود حساب مخزن مسبقاً في الذاكرة عند فتح التطبيق
+        window.onload = function() {
+            const savedUser = localStorage.getItem('xmaps_user');
+            if (savedUser) {
+                const userData = JSON.parse(savedUser);
+                userPhone = userData.phone;
+                isNewUser = userData.isNewUser;
+                leftTrips = userData.leftTrips;
+
+                // تخطي شاشة الدخول والدخول مباشرة للتطبيق
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appScreen').style.display = 'flex';
+
+                setTimeout(() => { initMap(); }, 300);
+
+                const ch = userPhone.slice(-1);
+                document.getElementById('userAvatar').innerText = ch;
+                document.getElementById('mAvatar').innerText = ch;
+                document.getElementById('mPhone').innerText = userPhone;
+
+                if (isNewUser) {
+                    document.getElementById('tripBtn').innerText = `🏁 بدء الرحلة (${leftTrips} متبقية)`;
+                    document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
+                } else {
+                    document.getElementById('tripBtn').innerText = `🏁 بدء الرحلة`;
+                    document.getElementById('mTrips').innerText = `حساب مسجل (غير محدود)`;
+                }
+            }
+        };
 
         function initMap() {
             if (map) { map.resize(); return; }
@@ -215,8 +243,6 @@
                     const distanceKm = (data.routes[0].distance / 1000).toFixed(1);
                     const durationMin = Math.round(data.routes[0].duration / 60);
                     document.getElementById('destDist').innerText = `المسافة: ${distanceKm} كم - الوقت: ${durationMin} دقيقة`;
-                    
-                    // مسار الصوت التلقائي في الخلفية بدون زر نطق ظاهر
                     speakText(`تم رسم المسافة، المسافة ${distanceKm} كيلومتر والوقت المقدر ${durationMin} دقيقة`);
                 })
                 .catch(err => console.log('خطأ في جلب المسار:', err));
@@ -264,6 +290,15 @@
                 if(otp !== '1234') { alert('رمز التحقق خاطئ! الرمز هو 1234'); return; }
 
                 isNewUser = (mode === 'register');
+                
+                // حفظ بيانات المستخدم في ذاكرة الجهاز (LocalStorage)
+                const userData = {
+                    phone: userPhone,
+                    isNewUser: isNewUser,
+                    leftTrips: leftTrips
+                };
+                localStorage.setItem('xmaps_user', JSON.stringify(userData));
+
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appScreen').style.display = 'flex';
 
@@ -307,6 +342,13 @@
                     if(leftTrips > 0) {
                         leftTrips--;
                         document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
+                        
+                        // تحديث عدد الرحلات في الذاكرة المحلية
+                        const userData = JSON.parse(localStorage.getItem('xmaps_user'));
+                        if(userData) {
+                            userData.leftTrips = leftTrips;
+                            localStorage.setItem('xmaps_user', JSON.stringify(userData));
+                        }
                     } else {
                         alert('⚠️ لقد استنفذت الرحلات المجانية لحسابك الجديد!');
                         return;
@@ -345,6 +387,9 @@
 
         function openProfile() { document.getElementById('profilePopup').style.display = 'flex'; }
         function closeProfile() { document.getElementById('profilePopup').style.display = 'none'; }
-    </script>
-</body>
-</html>
+
+        // دالة تسجيل الخروج ومسح الذاكرة المحلية
+        function logoutUser() {
+            localStorage.removeItem('xmaps_user');
+            location.reload();
+     
