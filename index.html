@@ -117,11 +117,11 @@
             </div>
 
             <div class="vehicles-bar">
-                <button class="v-chip active" onclick="setVeh(this, 'سيارة')">🚗 سيارة</button>
-                <button class="v-chip" onclick="setVeh(this, 'دراجة')">🏍️ دراجة</button>
-                <button class="v-chip" onclick="setVeh(this, 'مشي')">🚶 مشي</button>
-                <button class="v-chip" onclick="setVeh(this, 'تاكسي')">🚕 تاكسي</button>
-                <button class="v-chip" onclick="setVeh(this, 'شاحنة')">🚚 شاحنة</button>
+                <button class="v-chip active" id="chipCar" onclick="setVeh(this, 'driving')">🚗 سيارة</button>
+                <button class="v-chip" id="chipMoto" onclick="setVeh(this, 'driving')">🏍️ دراجة</button>
+                <button class="v-chip" id="chipWalk" onclick="setVeh(this, 'walking')">🚶 مشي</button>
+                <button class="v-chip" id="chipTaxi" onclick="setVeh(this, 'driving')">🚕 تاكسي</button>
+                <button class="v-chip" id="chipTruck" onclick="setVeh(this, 'driving')">🚚 شاحنة</button>
             </div>
         </div>
 
@@ -132,7 +132,7 @@
             <div class="banner" id="navBanner">
                 <div>
                     <h4 id="destTitle">الوجهة</h4>
-                    <p id="destDist">المسافة المقدرة: 5.4 كم - 12 دقيقة</p>
+                    <p id="destDist">المسافة المقدرة: جاري الحساب...</p>
                 </div>
                 <button onclick="speakText('الملاحة جارية نحو الوجهة')" style="background:#38bdf8; border:none; padding:6px 10px; border-radius:8px; font-weight:bold; cursor:pointer;">🔊 نطق</button>
             </div>
@@ -170,6 +170,9 @@
         let map = null;
         let userMarker = null;
         let destMarker = null;
+        let userCoords = [44.3661, 33.3152]; // بغداد افتراضياً
+        let destCoords = null;
+        let travelMode = 'driving'; // driving أو walking أو cycling
 
         mapboxgl.accessToken = 'pk.eyJ1IjoidThnIiwiYSI6ImNtdjhicmtodTBreWgyd3FzMnc3ZzNiM3gifQ.kkKU-Mf4PSb3U_28WHyXwA';
 
@@ -182,19 +185,68 @@
             map = new mapboxgl.Map({
                 container: 'map',
                 style: 'mapbox://styles/mapbox/streets-v12',
-                center: [44.3661, 33.3152], // بغداد افتراضياً
+                center: userCoords,
                 zoom: 13
             });
 
+            // النقر على الخريطة لتحديد الوجهة ورسم المسار المنحني عبر الشوارع الحقيقية
             map.on('click', (e) => {
-                const coords = [e.lngLat.lng, e.lngLat.lat];
+                destCoords = [e.lngLat.lng, e.lngLat.lat];
+                
                 if (destMarker) destMarker.remove();
-                destMarker = new mapboxgl.Marker({ color: '#ea4335' }).setLngLat(coords).addTo(map);
+                destMarker = new mapboxgl.Marker({ color: '#ea4335' }).setLngLat(destCoords).addTo(map);
+                
                 currentDest = `خط عرض: ${e.lngLat.lat.toFixed(3)}, خط طول: ${e.lngLat.lng.toFixed(3)}`;
                 document.getElementById('destTitle').innerText = currentDest;
                 document.getElementById('navBanner').style.display = 'flex';
-                speakText('تم تحديد الوجهة بنجاح');
+
+                // جلب ورسم المسار الحقيقي المتناسق مع الشوارع
+                getRoute(userCoords, destCoords);
             });
+        }
+
+        // دالة جلب مسار التوجيه الحقيقي (تجنب الخطوط العدلة عبر الـ Directions API)
+        function getRoute(start, end) {
+            const url = `https://api.mapbox.com/directions/v5/mapbox/${travelMode}/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.routes || data.routes.length === 0) return;
+                    const routeGeoJSON = data.routes[0].geometry;
+
+                    if (map.getSource('route')) {
+                        map.getSource('route').setData(routeGeoJSON);
+                    } else {
+                        map.addLayer({
+                            id: 'route',
+                            type: 'line',
+                            source: {
+                                type: 'geojson',
+                                data: {
+                                    type: 'Feature',
+                                    properties: {},
+                                    geometry: routeGeoJSON
+                                }
+                            },
+                            layout: {
+                                'line-join': 'round',
+                                'line-cap': 'round'
+                            },
+                            paint: {
+                                'line-color': '#1a73e8',
+                                'line-width': 6,
+                                'line-opacity': 0.85
+                            }
+                        });
+                    }
+
+                    const distanceKm = (data.routes[0].distance / 1000).toFixed(1);
+                    const durationMin = Math.round(data.routes[0].duration / 60);
+                    document.getElementById('destDist').innerText = `المسافة: ${distanceKm} كم - الوقت المقدر: ${durationMin} دقيقة`;
+                    speakText(`تم رسم المسار بنجاح، المسافة ${distanceKm} كيلومتر`);
+                })
+                .catch(err => console.log('خطأ في جلب المسار:', err));
         }
 
         function forceReloadMap() {
@@ -246,7 +298,6 @@
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appScreen').style.display = 'flex';
 
-                // تشغيل وتحميل الخريطة بعد إظهار الشاشة لضمان أخذ الأبعاد الصحيحة
                 setTimeout(() => {
                     initMap();
                 }, 300);
@@ -275,33 +326,48 @@
             speakText(`تم تحديد الوجهة نحو ${query}`);
         }
 
-        function setVeh(el, v) {
+        function setVeh(el, tMode) {
             document.querySelectorAll('.v-chip').forEach(c => c.classList.remove('active'));
             if(el && el.classList) el.classList.add('active');
+            travelMode = tMode;
+
+            // إعادة حساب المسار بناءً على وسيلة النقل المختارة
+            if (userCoords && destCoords) {
+                getRoute(userCoords, destCoords);
+            }
         }
 
         function startTrip() {
+            if(!destCoords) {
+                alert('يرجى النقر على الخريطة أولاً لتحديد الوجهة ورسم المسار!');
+                return;
+            }
+
             if(isNewUser) {
                 if(leftTrips > 0) {
                     leftTrips--;
                     document.getElementById('tCnt').innerText = leftTrips;
                     document.getElementById('mTrips').innerText = `الرحلات المجانية المتبقية: ${leftTrips}`;
-                    alert(`🏁 بدء الملاحة نحو ${currentDest}! (تبقت لديك ${leftTrips} رحلات)`);
+                    alert(`🏁 بدء الملاحة نحو الوجهة! (تبقت لديك ${leftTrips} رحلات)`);
                 } else {
                     alert('⚠️ لقد استنفذت الرحلات المجانية لحسابك الجديد!');
                 }
             } else {
-                alert(`🏁 بدء الملاحة نحو ${currentDest}!`);
+                alert(`🏁 بدء الملاحة نحو الوجهة بنجاح!`);
             }
         }
 
         function locateUser() {
             if(navigator.geolocation && map) {
                 navigator.geolocation.getCurrentPosition(pos => {
-                    const coords = [pos.coords.longitude, pos.coords.latitude];
-                    map.flyTo({ center: coords, zoom: 15 });
+                    userCoords = [pos.coords.longitude, pos.coords.latitude];
+                    map.flyTo({ center: userCoords, zoom: 15 });
                     if(userMarker) userMarker.remove();
-                    userMarker = new mapboxgl.Marker({ color: '#1a73e8' }).setLngLat(coords).addTo(map);
+                    userMarker = new mapboxgl.Marker({ color: '#1a73e8' }).setLngLat(userCoords).addTo(map);
+                    
+                    if(destCoords) {
+                        getRoute(userCoords, destCoords);
+                    }
                 }, () => { alert('يرجى السماح بصلاحية الوصول للموقع (GPS)'); });
             } else {
                 alert('خدمة تحديد الموقع غير مدعومة');
