@@ -234,7 +234,7 @@
             align-items: center;
         }
 
-        /* شريط التوجيه الصوتي الحي أثناء القيادة */
+        /* شريط التوجيه الصوتي والحي المحدث */
         .navigation-banner {
             position: absolute;
             top: 15px;
@@ -252,15 +252,30 @@
         }
 
         .nav-instruction h3 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: #38bdf8;
             margin-bottom: 2px;
         }
 
         .nav-instruction p {
-            font-size: 13px;
+            font-size: 12px;
             color: #cbd5e1;
+        }
+
+        .voice-action-btn {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
         }
 
         .bottom-actions {
@@ -333,8 +348,8 @@
     <div id="mapScreen">
         <div class="top-control-panel">
             <div class="google-search-bar">
-                <span style="font-size: 18px; color: #5f6368;">🔍</span>
-                <input type="text" id="searchInput" placeholder="اضغط على الخريطة لتحديد الوجهة و رسم المسار" readonly>
+                <span style="font-size: 18px; color: #5f6368; cursor: pointer;" onclick="searchLocation()">🔍</span>
+                <input type="text" id="searchInput" placeholder="ابحث عن مكان (مثل: المنصور، الكرادة)..." onkeypress="handleSearch(event)">
                 <span style="font-size: 20px; cursor: pointer;" onclick="openProfile()">👤</span>
             </div>
 
@@ -348,13 +363,15 @@
         <div class="map-wrapper">
             <div id="map"></div>
             
-            <!-- شريط التوجيه الصوتي والحي -->
+            <!-- شريط التوجيه الصوتي البارز -->
             <div id="navBanner" class="navigation-banner">
                 <div class="nav-instruction">
-                    <h3 id="navTitle">جاري توجيه الرحلة...</h3>
-                    <p id="navDetail">ابق على المسار الرئيسي</p>
+                    <h3 id="navTitle">جاهز للملاحة</h3>
+                    <p id="navDetail">اضغط على زر الصوت لسماع التوجيهات</p>
                 </div>
-                <button onclick="speakInstruction()" style="background: #38bdf8; border: none; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; font-size: 16px;" title="إعادة الصوت">🔊</button>
+                <button class="voice-action-btn" onclick="speakInstruction()">
+                    <span>🔊</span> نطق التوجيه
+                </button>
             </div>
 
             <button class="gps-fab" onclick="locateUser()" title="موقعي الحالي">📍</button>
@@ -374,7 +391,7 @@
         let map = null;
         let userMarker = null;
         let destinationMarker = null;
-        let userCoords = [44.3661, 33.3152]; // الافتراضي بغداد
+        let userCoords = [44.3661, 33.3152]; // بغداد
         let destCoords = null;
         let profileType = 'driving';
         let currentRouteData = null;
@@ -397,16 +414,52 @@
 
             map.on('click', (e) => {
                 destCoords = [e.lngLat.lng, e.lngLat.lat];
-                
-                if (destinationMarker) destinationMarker.remove();
-                destinationMarker = new mapboxgl.Marker({ color: '#ea4335' })
-                    .setLngLat(destCoords)
-                    .addTo(map);
-
-                document.getElementById('searchInput').value = `وجهة مختارة: ${e.lngLat.lat.toFixed(4)}, ${e.lngLat.lng.toFixed(4)}`;
-                
-                getRoute(userCoords, destCoords);
+                setDestination(destCoords, `إحداثيات المختارة: ${e.lngLat.lat.toFixed(4)}, ${e.lngLat.lng.toFixed(4)}`);
             });
+        }
+
+        function searchLocation() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert('يرجى كتابة اسم المكان للبحث!');
+                return;
+            }
+
+            const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}&country=iq`;
+
+            fetch(geocodeUrl)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.features && data.features.length > 0) {
+                        const firstMatch = data.features[0];
+                        destCoords = firstMatch.center;
+                        const placeName = firstMatch.place_name_ar || firstMatch.place_name;
+
+                        map.flyTo({ center: destCoords, zoom: 14 });
+                        setDestination(destCoords, placeName);
+                    } else {
+                        alert('عذراً، لم نتمكن من العثور على هذا المكان!');
+                    }
+                })
+                .catch(err => console.error('خطأ في البحث:', err));
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                searchLocation();
+            }
+        }
+
+        function setDestination(coords, nameText) {
+            destCoords = coords;
+            
+            if (destinationMarker) destinationMarker.remove();
+            destinationMarker = new mapboxgl.Marker({ color: '#ea4335' })
+                .setLngLat(destCoords)
+                .addTo(map);
+
+            document.getElementById('searchInput').value = nameText;
+            getRoute(userCoords, destCoords);
         }
 
         function getRoute(start, end) {
@@ -454,29 +507,32 @@
                     document.getElementById('navTitle').innerText = `المسافة: ${distanceKm} كم`;
                     document.getElementById('navDetail').innerText = `الوقت المقدر: ${durationMin} دقيقة`;
                     
-                    speakText(`تم رسم المسار بنجاح. المسافة هي ${distanceKm} كيلومتر، والوقت المقدر هو ${durationMin} دقيقة.`);
+                    // إظهار شريط التوجيه تلقائياً
+                    document.getElementById('navBanner').style.display = 'flex';
                 })
                 .catch(err => console.log('خطأ في جلب المسار:', err));
         }
 
-        // دالة التوجيه الصوتي الحي (Text-to-Speech)
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // إيقاف أي كلام سابق
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ar-SA'; // اللغة العربية
-                utterance.rate = 1.0;
-                window.speechSynthesis.speak(utterance);
+        // دالة تشغيل الصوت التفاعلية (تشتغل بضغطة زر يدوية لتجاوز حظر المتصفح)
+        function speakInstruction() {
+            if (!currentRouteData) {
+                speakText('يرجى اختيار وجهة أولاً على الخريطة أو عبر البحث.');
+                return;
             }
+            const distanceKm = (currentRouteData.distance / 1000).toFixed(1);
+            const durationMin = Math.round(currentRouteData.duration / 60);
+            speakText(`المسافة إلى الوجهة هي ${distanceKm} كيلومتر، والوقت المقدر للوصول هو ${durationMin} دقيقة.`);
         }
 
-        function speakInstruction() {
-            if (currentRouteData) {
-                const distanceKm = (currentRouteData.distance / 1000).toFixed(1);
-                const durationMin = Math.round(currentRouteData.duration / 60);
-                speakText(`الوجهة تبعد ${distanceKm} كيلومتر، والوقت المقدر للوصول هو ${durationMin} دقيقة.`);
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ar-SA';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
             } else {
-                speakText('يرجى تحديد وجهة على الخريطة أولاً.');
+                alert('متصفحك لا يدعم خاصية النطق الصوتي.');
             }
         }
 
@@ -536,48 +592,4 @@
             }, 100);
 
             if (isNewAccount) {
-                document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (<span id="tripCount">${remainingTrips}</span> متبقية)`;
-            } else {
-                document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (غير محدود)`;
-            }
-        }
-
-        let isCarMode = false;
-        function toggleCarMode() {
-            isCarMode = !isCarMode;
-            const btn = document.getElementById('driveModeBtn');
-            const navBanner = document.getElementById('navBanner');
-
-            if (isCarMode) {
-                btn.innerHTML = '✕ خروج';
-                btn.style.background = '#dc2626';
-                navBanner.style.display = 'flex';
-                speakText('تم تفعيل وضع القيادة والملاحة الصوتية الحية.');
-            } else {
-                btn.innerHTML = '🚘 وضع القيادة';
-                btn.style.background = '#1e293b';
-                navBanner.style.display = 'none';
-                speakText('العودة للوضع العادي.');
-            }
-        }
-
-        function startTrip() {
-            if (!destCoords) { 
-                alert('يرجى النقر على الخريطة أولاً لتحديد وجهتك ورسم المسار!'); 
-                speakText('يرجى تحديد وجهة على الخريطة أولاً.');
-                return; 
-            }
-
-            if (isNewAccount) {
-                if (remainingTrips > 0) {
-                    remainingTrips--;
-                    document.getElementById('tripCount').innerText = remainingTrips;
-                    speakText('بدء الرحلة نحو الوجهة. تم خصم رحلة مجانية واحدة.');
-                    alert('🏁 بدء الملاحة نحو الوجهة بنجاح!\n(تبقت لديك ' + remainingTrips + ' رحلات مجانية)');
-                } else {
-                    speakText('لقد استنفذت الحد المسموح به لإنشاء الحساب.');
-                    alert('⚠️ لقد استنفذت الحد المسموح به لإنشاء الحساب (رحلتان فقط)!');
-                }
-            } else {
-                speakText('بدء الملاحة نحو الوجهة بنجاح.');
-                alert('🏁 بدء الملاحة نحو الوجه
+                document.getElementById('tripBtn').innerHTML = `🏁 بدء الرحلة (<span id="tripCount">${remainin
