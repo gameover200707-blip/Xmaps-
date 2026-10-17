@@ -360,7 +360,7 @@
             }
         }
 
-        function locateUser() {
+        function watchPosition() {
             if(navigator.geolocation && map) {
                 navigator.geolocation.getCurrentPosition(pos => {
                     userCoords = [pos.coords.longitude, pos.coords.latitude];
