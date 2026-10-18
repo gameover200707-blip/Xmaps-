@@ -359,9 +359,8 @@
                 speakText('تم إلغاء الرحلة');
             }
         }
-
-        function watchPosition() {
-            if(navigator.geolocation && map) {
+        function locateUser() {
+           if(navigator.geolocation && map) {
                 navigator.geolocation.getCurrentPosition(pos => {
                     userCoords = [pos.coords.longitude, pos.coords.latitude];
                     map.flyTo({ center: userCoords, zoom: 15 });
